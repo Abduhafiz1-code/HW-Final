@@ -172,8 +172,14 @@ const flipCard = async (card: Card) => {
             time_seconds: elapsed.value,
           });
         }
+
         await coinStore.fetchCoins();
         await coinStore.addProgress(100);
+        if (!user) {
+          return;
+        }
+
+
         await saveNotification(
           user.id,
           "So'z o'yini yakunlandi! 🃏",

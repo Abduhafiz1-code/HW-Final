@@ -49,6 +49,7 @@ export const checkAILimit = async (): Promise<{
 export const askAI = async (prompt: string): Promise<string> => {
   const { allowed, remaining } = await checkAILimit();
   if (!allowed) {
+    console.log("natije", remaining);
     return `❌ Kunlik limit tugadi! Bugun 5 ta so'rov bepul. Premium obuna bilan cheksiz foydalaning. 🌟`;
   }
 

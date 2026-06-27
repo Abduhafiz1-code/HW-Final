@@ -105,5 +105,6 @@ const markRead = async (id: string) => {
   if (n) n.is_read = true;
 };
 
+console.log(markRead);
 onMounted(() => fetchNotifications());
 </script>

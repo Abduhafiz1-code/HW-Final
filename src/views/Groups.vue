@@ -162,6 +162,7 @@ const joinGroup = async () => {
 };
 
 const leaveGroup = async (memberId: string, groupId: string) => {
+    console.log('Chiqish:', memberId, groupId);
     await supabase.from('group_members').delete().eq('id', memberId);
     myGroups.value = myGroups.value.filter((g: any) => g.id !== memberId);
 };
