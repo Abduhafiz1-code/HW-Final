@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background: #0f172a;
+}
+
+html.dark .bg-\[\#F7F9FC\],
+html.dark .bg-\[\#F8FAFF\],
+html.dark .bg-\[\#eef0f7\] {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-white {
+  background-color: #1e293b !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #334155 !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-\[\#1e1040\],
+html.dark .text-black {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-gray-500 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-gray-200,
+html.dark .border-base-200 {
+  border-color: #334155 !important;
+}

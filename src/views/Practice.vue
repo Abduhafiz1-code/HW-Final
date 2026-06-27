@@ -1,0 +1,201 @@
+<template>
+  <div class="min-h-screen bg-[#F7F9FC] px-4 pt-6 pb-28">
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center gap-3 mb-6">
+        <RouterLink to="/"
+          class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
+          ←</RouterLink>
+        <div>
+          <h1 class="text-xl font-black text-slate-900">📝 Mashq</h1>
+          <p class="text-xs text-slate-500">AI bilan kunlik mashqlar</p>
+        </div>
+      </div>
+
+      <!-- Topic selector -->
+      <div v-if="!session" class="space-y-4">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="font-black text-lg text-slate-900 mb-4">Mashq turini tanlang</h2>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button v-for="t in topics" :key="t.id" @click="selectedTopic = t.id"
+              :class="selectedTopic === t.id ? 'border-orange-400 bg-orange-50' : 'border-slate-200 bg-slate-50'"
+              class="p-4 rounded-2xl border-2 text-left transition hover:border-orange-300">
+              <div class="text-2xl mb-1">{{ t.icon }}</div>
+              <p class="font-bold text-sm text-slate-900">{{ t.name }}</p>
+              <p class="text-xs text-slate-500 mt-0.5">{{ t.desc }}</p>
+            </button>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-slate-700 block mb-1">Qo'shimcha mavzu (ixtiyoriy)</label>
+            <input v-model="customTopic" placeholder="Masalan: Pythagoras teoremasi"
+              class="w-full px-4 py-3 rounded-2xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
+          </div>
+          <div class="mt-4">
+            <label class="text-sm font-semibold text-slate-700 block mb-1">Savol soni</label>
+            <div class="flex gap-2">
+              <button v-for="n in [5, 10, 15]" :key="n" @click="questionCount = n"
+                :class="questionCount === n ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-700'"
+                class="flex-1 py-2 rounded-xl font-bold text-sm transition">{{ n }}</button>
+            </div>
+          </div>
+          <button @click="startPractice" :disabled="loading"
+            class="w-full mt-4 py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition disabled:opacity-60 active:scale-95">
+            {{ loading ? '⏳ Tayyorlanmoqda...' : '🚀 Mashqni boshlash' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Practice session -->
+      <div v-else>
+        <!-- Progress -->
+        <div class="bg-white rounded-2xl border border-slate-200 px-5 py-3 mb-4 flex items-center gap-4">
+          <div class="flex-1 bg-slate-100 rounded-full h-3">
+            <div class="bg-orange-500 h-3 rounded-full transition-all"
+              :style="{ width: `${(currentIdx / session.length) * 100}%` }"></div>
+          </div>
+          <span class="text-sm font-bold text-slate-600">{{ currentIdx }}/{{ session.length }}</span>
+          <span class="text-sm font-bold text-green-600">✓ {{ score }}</span>
+        </div>
+
+        <!-- Done -->
+        <div v-if="currentIdx >= session.length"
+          class="bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-sm">
+          <div class="text-6xl mb-4">{{ score >= session.length * 0.7 ? '🌟' : '💪' }}</div>
+          <h2 class="text-2xl font-black text-slate-900">Mashq yakunlandi!</h2>
+          <p class="text-slate-500 mt-2">{{ score }}/{{ session.length }} to'g'ri javob</p>
+          <div class="w-full bg-slate-100 rounded-full h-4 mt-4">
+            <div class="bg-green-500 h-4 rounded-full" :style="{ width: `${(score / session.length) * 100}%` }"></div>
+          </div>
+          <p class="text-lg font-bold text-green-600 mt-3">{{ Math.round((score / session.length) * 100) }}%</p>
+          <div class="flex gap-3 mt-6">
+            <button @click="restartPractice"
+              class="flex-1 py-3 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition">Qayta</button>
+            <button @click="session = null"
+              class="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition">Bosh
+              sahifa</button>
+          </div>
+        </div>
+
+        <!-- Question -->
+        <div v-else-if="current" class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <p class="text-xs font-bold uppercase tracking-wider text-orange-500 mb-2">Savol {{ currentIdx + 1 }}</p>
+          <p class="text-lg font-black text-slate-900 mb-6 leading-snug">{{ current.question }}</p>
+          <div class="space-y-3">
+            <button v-for="opt in current.options" :key="opt" @click="selectAnswer(opt)" :disabled="!!selected" :class="{
+              'border-green-400 bg-green-50 text-green-700': selected && opt === current.answer,
+              'border-red-400 bg-red-50 text-red-600': selected === opt && opt !== current.answer,
+              'border-slate-200 hover:border-orange-300 hover:bg-orange-50': !selected,
+            }"
+              class="w-full px-5 py-3 rounded-2xl border-2 text-left font-semibold text-sm text-slate-800 transition disabled:cursor-default">
+              {{ opt }}
+            </button>
+          </div>
+          <div v-if="selected" class="mt-4">
+            <p class="text-sm font-semibold" :class="selected === current.answer ? 'text-green-600' : 'text-red-500'">
+              {{ selected === current.answer ? '✅ Barakalla! To\'g\'ri!' : `❌ Noto\'g\'ri. To\'g\'ri javob: ${current.answer}` }}
+            </p>
+            <p v-if="current.explanation" class="text-xs text-slate-500 mt-1">{{ current.explanation }}</p>
+            <button @click="nextQuestion"
+              class="mt-3 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition">
+              {{ currentIdx + 1 >= session.length ? '🏁 Yakunla' : 'Keyingi →' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import supabase from '../supabase';
+import { askAIJson } from '../lib/ai';
+import { useCoinStore } from '../stores/CoinStore';
+import { saveNotification } from '../lib/Notification';
+const coinStore = useCoinStore();
+
+const topics = [
+  { id: 'math', icon: '🔢', name: 'Matematika', desc: 'Algebra, geometriya' },
+  { id: 'english', icon: '🇬🇧', name: 'Ingliz tili', desc: 'Grammar, vocabulary' },
+  { id: 'science', icon: '🔬', name: 'Fan', desc: 'Fizika, kimyo, biologiya' },
+  { id: 'history', icon: '📜', name: 'Tarix', desc: "O'zbekiston va dunyo tarixi" },
+  { id: 'geography', icon: '🌍', name: 'Geografiya', desc: 'Mamlakatlar, kapitallar' },
+  { id: 'uzbek', icon: '🇺🇿', name: "O'zbek tili", desc: 'Grammatika, imlo' },
+];
+
+interface Question { question: string; options: string[]; answer: string; explanation?: string; }
+
+const selectedTopic = ref('math'); const customTopic = ref(''); const questionCount = ref(5);
+const loading = ref(false); const session = ref<Question[] | null>(null);
+const currentIdx = ref(0); const score = ref(0); const selected = ref('');
+const activeTopic = ref('');
+const current = computed(() => session.value?.[currentIdx.value]);
+
+const startPractice = async () => {
+  loading.value = true;
+  const topicName = topics.find(t => t.id === selectedTopic.value)?.name || selectedTopic.value;
+  const topic = customTopic.value || topicName;
+  activeTopic.value = topic;
+
+  const result = await askAIJson<Question[]>(
+    `Generate ${questionCount.value} multiple choice questions about "${topic}".
+Return ONLY a JSON array, no other text:
+[
+  {
+    "question": "Question text here?",
+    "options": ["First option", "Second option", "Third option", "Fourth option"],
+    "answer": "First option",
+    "explanation": "Brief explanation"
+  }
+]
+IMPORTANT: "answer" must be exactly identical to one of the "options" values.`,
+    []
+  );
+
+  if (result && result.length) {
+    session.value = result;
+    currentIdx.value = 0; score.value = 0; selected.value = '';
+  } else {
+    alert("Xatolik. Qayta urinib ko'ring.");
+  }
+  loading.value = false;
+};
+const selectAnswer = (opt: string) => {
+  if (selected.value) return;
+  selected.value = opt;
+  if (current.value && opt === current.value.answer) score.value++;
+};
+
+const savePractice = async () => {
+  if (!session.value) return;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const percent = Math.round((score.value / session.value.length) * 100);
+  await supabase.from('practice_results').insert({
+    user_id: user.id,
+    topic: activeTopic.value,
+    correct: score.value,
+    question_count: session.value.length,
+    percent,
+  });
+  await coinStore.fetchCoins();
+  await coinStore.addProgress(percent);
+
+
+  // savePractice ichida, supabase.from insert dan keyin:
+  await saveNotification(
+    user.id,
+    'Mashq yakunlandi! 📝',
+    `${activeTopic.value} — ${percent}% natija`,
+    '📝', `+${percent}%`, 'bg-green-50', 'text-green-500', 'bg-green-50 text-green-600'
+  );
+};
+
+const nextQuestion = async () => {
+  currentIdx.value++;
+  selected.value = '';
+  if (session.value && currentIdx.value >= session.value.length) {
+    await savePractice();
+  }
+};
+
+const restartPractice = () => { currentIdx.value = 0; score.value = 0; selected.value = ''; };
+</script>
