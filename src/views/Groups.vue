@@ -3,7 +3,7 @@
         <div class="max-w-2xl mx-auto">
             <div class="flex items-center gap-3 mb-6">
                 <RouterLink to="/"
-                    class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
+                    class="w-10 h-10 inline md:hidden rounded-xl text-slate-800 bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
                     ←
                 </RouterLink>
                 <div>
@@ -18,10 +18,10 @@
                 <p class="text-xs text-slate-500 mb-4">O'qituvchi bergan kodni kiriting</p>
                 <div class="flex gap-2">
                     <input v-model="joinCode" placeholder="Masalan: AB12" maxlength="4"
-                        class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-orange-400" />
+                        class="flex-1 w-[75%] px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-800 text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-orange-400" />
                     <button @click="joinGroup" :disabled="joinCode.length < 4 || joining"
                         class="px-5 py-3 bg-orange-500 text-white font-bold rounded-2xl text-sm hover:bg-orange-600 transition disabled:opacity-50">
-                        {{ joining ? '⏳' : 'Qo\'shilish' }}
+                        {{ joining ? '⏳' : 'Add' }}
                     </button>
                 </div>
                 <p v-if="joinError" class="text-red-500 text-xs mt-2">{{ joinError }}</p>
@@ -83,6 +83,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import supabase from '../supabase';
+
 
 const joinCode = ref('');
 const joining = ref(false);

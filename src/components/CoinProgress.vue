@@ -40,13 +40,14 @@
     </div>
 
     <!-- Milestone track -->
-    <div class="mx-4 -mt-4 bg-white rounded-2xl border border-slate-100 shadow-md px-4 pt-4 pb-3 relative z-10">
+    <div
+      class="mx-4 -mt-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-md px-4 pt-4 pb-3 relative z-10">
       <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
         Progress sovg'alari
       </p>
 
-      <div class="flex gap-2 flex-wrap">
-        <div v-for="m in visibleMilestones" :key="m" class="flex flex-col items-center gap-1">
+      <div class="flex gap-3 overflow-x-auto pb-1" style="scrollbar-width: none;">
+        <div v-for="m in visibleMilestones" :key="m" class="flex flex-col items-center gap-1 flex-shrink-0">
           <button @click="coinStore.claimMilestone(m)" :disabled="!coinStore.canClaimMilestone(m)" :class="[
             coinStore.claimedMilestones.includes(m)
               ? 'bg-green-100 border-green-300 cursor-default'

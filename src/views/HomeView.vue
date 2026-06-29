@@ -1,26 +1,37 @@
 <template>
-  <div class="flex min-h-screen flex-col gap-4 bg-[#F7F9FC] pb-28">
-    <div class="mx-4 sm:mx-5">
+  <div class="min-h-screen bg-[#F7F9FC] dark:bg-slate-900 pb-28">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-4">
+
       <Header />
-      <div
-        class="mt-4 flex justify-between md:flex-row md:items-center md:justify-between">
+
+      <!-- Strike alohida qatorda -->
+
+
+
+
+      <!-- Tugmalar alohida qatorda, o'ngga -->
+      <div class="mt-2 flex items-center justify-between gap-2">
         <Strike />
-        <div class="flex items-center gap-2">
-          <RouterLink
-            to="/translate"
-            class="flex items-center gap-1.5 font-bold text-sm text-indigo-600 bg-indigo-50 px-3 py-2 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition"
-            >🌐 Tarjimon</RouterLink
-          >
-          <Bell />
-        </div>
+
+
+
+
+        <Bell />
+
       </div>
-      <Main />
-      <div class="mt-4"><CoinProgress /></div>
-      <Premium />
+
+      <div class="mt-6">
+        <Main />
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-6">
+        <CoinProgress />
+        <Premium />
+      </div>
+
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import Header from "../components/Header.vue";
 import Main from "../components/HeaderMain.vue";
@@ -29,4 +40,5 @@ import Bell from "../components/Bell__message.vue";
 // import Progress from '../components/Progress.vue';
 import Premium from "../components/Premium_get.vue";
 import CoinProgress from "../components/CoinProgress.vue";
+
 </script>

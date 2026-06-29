@@ -41,3 +41,52 @@ html.dark .border-gray-200,
 html.dark .border-base-200 {
   border-color: #334155 !important;
 }
+@variant dark (&:where(html.dark, html.dark *));
+
+html.dark {
+  color-scheme: dark;
+}
+/* Butun loyiha bo'ylab scrollbarni yashirish */
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE va eski Edge */
+* {
+  -ms-overflow-style: none;
+}
+
+/* === Theme Toggle styling === */
+.toggle.theme-controller {
+  --tglbg: #e2e8f0; /* light: kulrang track */
+  --togglehandleborder: 0 0;
+  background-color: #94a3b8;
+  border-color: #e2e8f0;
+  width: 2.5rem;
+  height: 1.25rem;
+}
+
+.toggle.theme-controller:checked {
+  --tglbg: #f97316; /* dark: orange track — loyiha rangiga mos */
+  background-color: #ffffff;
+  border-color: #f97316;
+}
+
+/* Quyosh/oy iconlari rangi */
+label:has(.toggle.theme-controller) svg {
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+html.dark label:has(.toggle.theme-controller) svg {
+  color: #94a3b8;
+}

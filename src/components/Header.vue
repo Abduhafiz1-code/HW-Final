@@ -3,7 +3,7 @@
     class="h-24 bg-no-repeat bg-cover overflow-hidden bg-center shadow-xs shadow-black flex justify-between items-center mt-4 rounded-xl px-5"
     :style="{ backgroundImage: `url(${bg})` }">
     <div>
-      <div class="flex flex-col text-xl text-left font-bold leading-tight">
+      <div class="flex flex-col text-sm md:text-xl text-left font-bold leading-tight">
         <span>Xush kelibsiz!</span>
         <span>{{ authStore.displayName }} 👋</span>
       </div>

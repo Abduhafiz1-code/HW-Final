@@ -1,6 +1,6 @@
 import supabase from "../supabase";
 
-const AI_DAILY_LIMIT = 5;
+const AI_DAILY_LIMIT = 100;
 
 const getTodayKey = () => {
   const today = new Date().toISOString().split("T")[0]; // "2026-06-27"
