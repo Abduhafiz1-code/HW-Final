@@ -18,7 +18,7 @@
 import { Bell } from "@lucide/vue";
 import { ref, onMounted, watch } from "vue";
 import supabase from "../supabase";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 // import { ref, onMounted, watch } from "vue";
 const unreadCount = ref(0);
 const route = useRoute();
