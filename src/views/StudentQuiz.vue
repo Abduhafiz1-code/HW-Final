@@ -12,7 +12,7 @@
       </div>
 
       <!-- Code entry -->
-      <div v-if="!test && !loading">
+      <div v-if="!test && !loading && !blocked">
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <div class="text-center mb-6">
             <div class="text-5xl mb-3">🔑</div>
@@ -25,7 +25,7 @@
           </div>
           <input v-model="codeInput" @input="codeInput = codeInput.toUpperCase()" @keyup.enter="findTest" maxlength="4"
             placeholder="AB3X"
-            class="w-full text-center text-3xl text-slate-800 font-black tracking-[0.5em] px-4 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:border-orange-400 transition uppercase mb-4" />
+            class="w-full text-center text-3xl font-black tracking-[0.5em] px-4 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 !text-slate-900 focus:outline-none focus:border-orange-400 transition uppercase mb-4" />
           <p v-if="notFound" class="text-red-500 text-sm text-center bg-red-50 rounded-xl px-4 py-2 mb-3">
             ❌ Bunday kodli test topilmadi
           </p>
@@ -43,7 +43,7 @@
           <div v-for="r in myResults" :key="r.id"
             class="bg-white rounded-2xl border border-slate-200 p-4 mb-2 shadow-sm flex items-center justify-between">
             <div>
-              <p class="font-bold text-sm text-slate-900">
+              <p class="font-bold text-sm !text-slate-900">
                 {{ r.tests?.title }}
               </p>
               <p class="text-xs text-slate-500">
@@ -52,11 +52,27 @@
               </p>
             </div>
             <span :class="r.percent >= 70
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-50 text-red-600'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-50 text-red-600'
               " class="text-sm font-black px-3 py-1 rounded-xl">{{ r.percent }}%</span>
           </div>
         </div>
+      </div>
+
+      <!-- Blocked -->
+      <div v-else-if="blocked" class="bg-white rounded-3xl border border-red-200 p-8 text-center shadow-sm">
+        <div class="text-6xl mb-4">🚫</div>
+        <h2 class="text-xl font-black text-red-600">Siz testdan chiqarildingiz</h2>
+        <p class="text-sm text-slate-500 mt-2">
+          Test davomida ekrandan uzoqlashganingiz uchun test bekor qilindi.
+        </p>
+        <p class="text-sm text-slate-500 mt-1">
+          Qayta kirish uchun o'qituvchingizdan ruxsat so'rang.
+        </p>
+        <RouterLink to="/"
+          class="inline-block mt-6 px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition">
+          Bosh sahifa
+        </RouterLink>
       </div>
 
       <!-- Loading -->
@@ -70,7 +86,7 @@
       <div v-else-if="test && !started && !finished">
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm text-center">
           <div class="text-5xl mb-4">📝</div>
-          <h2 class="text-xl font-black text-slate-900">{{ test.title }}</h2>
+          <h2 class="text-xl font-black !text-slate-900">{{ test.title }}</h2>
           <p class="text-slate-500 text-sm mt-1">{{ test.subject }}</p>
           <div class="flex justify-center gap-6 mt-5 mb-6">
             <div class="text-center">
@@ -86,6 +102,10 @@
               <p class="text-xs text-slate-500">daqiqa</p>
             </div>
           </div>
+          <p class="text-xs text-amber-600 bg-amber-50 rounded-xl px-4 py-2 mb-4">
+            ⚠️ Test davomida boshqa ekranga / tabga o'tmang. 5 soniyadan ko'p
+            uzoqlashsangiz, test avtomatik bekor qilinadi.
+          </p>
           <button @click="startTest"
             class="w-full py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition active:scale-95">
             🚀 Testni boshlash
@@ -109,42 +129,30 @@
             }"></div>
           </div>
           <span
-            class="text-sm font-bold text-slate-600 flex-shrink-0">{{ currentIdx }}/{{ test.questions.length }}</span>
-          <span class="text-sm font-bold text-green-600 flex-shrink-0">✓ {{ score }}</span>
+            class="text-sm font-bold !text-slate-600 flex-shrink-0">{{ currentIdx }}/{{ test.questions.length }}</span>
         </div>
 
         <!-- Question card -->
-        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div class="!bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <p class="text-xs font-bold uppercase tracking-wider text-orange-500 mb-2">
             Savol {{ currentIdx + 1 }}
           </p>
-          <p class="text-lg font-black text-slate-900 mb-6 leading-snug">
+          <p class="text-lg font-black !text-slate-900 mb-6 leading-snug">
             {{ currentQ.question }}
           </p>
           <div class="space-y-3">
             <button v-for="opt in currentQ.options" :key="opt" @click="selectAnswer(opt)" :disabled="!!selectedAnswer"
-              :class="{
-                'border-green-400 bg-green-50 text-green-700':
-                  selectedAnswer && opt === currentQ.answer,
-                'border-red-400 bg-red-50 text-red-600':
-                  selectedAnswer === opt && opt !== currentQ.answer,
-                'border-slate-200 hover:border-orange-300 hover:bg-orange-50':
-                  !selectedAnswer,
-              }"
-              class="w-full px-5 py-3.5 rounded-2xl border-2 text-left font-semibold text-sm text-slate-800 transition disabled:cursor-default">
+              :class="selectedAnswer === opt
+                ? 'border-orange-500 bg-orange-50 !text-orange-700'
+                : 'border-slate-200 !bg-white !text-slate-800 hover:border-orange-300 hover:bg-orange-50'
+                "
+              class="w-full px-5 py-3.5 rounded-2xl border-2 text-left font-semibold text-sm transition disabled:cursor-default">
               {{ opt }}
             </button>
           </div>
           <div v-if="selectedAnswer" class="mt-5">
-            <p class="text-sm font-bold" :class="selectedAnswer === currentQ.answer
-                ? 'text-green-600'
-                : 'text-red-500'
-              ">
-              {{
-                selectedAnswer === currentQ.answer
-                  ? "✅ To'g'ri! Barakalla!"
-                  : `❌ Noto'g'ri. To'g'ri: ${currentQ.answer}`
-              }}
+            <p class="text-sm font-bold !text-slate-500">
+              ✔️ Javobingiz qabul qilindi
             </p>
             <button @click="nextQuestion"
               class="mt-3 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition active:scale-95">
@@ -172,7 +180,7 @@
                     : "💪"
             }}
           </div>
-          <h2 class="text-2xl font-black text-slate-900">Test yakunlandi!</h2>
+          <h2 class="text-2xl font-black !text-slate-900">Test yakunlandi!</h2>
           <p class="text-slate-500 mt-1 text-sm">{{ test.title }}</p>
 
           <div class="mt-6 bg-slate-50 rounded-2xl p-5">
@@ -188,7 +196,7 @@
             </div>
           </div>
 
-          <p class="mt-4 font-bold text-slate-700">
+          <p class="mt-4 font-bold !text-slate-700">
             {{
               percent >= 90
                 ? "Ajoyib natija! Siz zo'rsiz!"
@@ -219,16 +227,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Ekrandan uzoqlashganda chiqadigan ogohlantirish (qaytib kelganda ko'rinadi) -->
+    <div v-if="showLeaveWarning" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-xl">
+        <div class="text-5xl mb-3">⚠️</div>
+        <h3 class="text-lg font-black !text-slate-900">Diqqat!</h3>
+        <p class="text-sm text-slate-500 mt-2">
+          Siz ekrandan uzoqlashdingiz. Testga qaytmasangiz
+          <span class="font-black text-red-500">{{ leaveCountdown }}</span>
+          soniyadan so'ng test bekor qilinadi.
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import supabase from "../supabase";
 import { useCoinStore } from "../stores/CoinStore";
-import { saveNotification } from '../lib/Notification';
-
-
+import { saveNotification } from "../lib/Notification";
 
 const coinStore = useCoinStore();
 const codeInput = ref("");
@@ -243,6 +262,15 @@ const currentIdx = ref(0);
 const score = ref(0);
 const selectedAnswer = ref("");
 const myResults = ref<any[]>([]);
+const blocked = ref(false);
+
+// --- Anti-cheat: ekrandan uzoqlashishni kuzatish ---
+const LEAVE_GRACE_SECONDS = 5;
+const showLeaveWarning = ref(false);
+const leaveCountdown = ref(LEAVE_GRACE_SECONDS);
+let leaveTimeoutId: number | null = null;
+let leaveIntervalId: number | null = null;
+let currentUserId: string | null = null;
 
 const currentQ = computed(() => test.value?.questions[currentIdx.value]);
 const percent = computed(() =>
@@ -256,6 +284,8 @@ onMounted(async () => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
+  currentUserId = user.id;
+
   const { data } = await supabase
     .from("test_results")
     .select("*, tests(title, subject)")
@@ -263,7 +293,119 @@ onMounted(async () => {
     .order("created_at", { ascending: false })
     .limit(5);
   myResults.value = data || [];
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  window.addEventListener("blur", handleWindowBlur);
+  window.addEventListener("focus", handleWindowFocus);
+  window.addEventListener("pagehide", handleHardLeave);
 });
+
+onBeforeUnmount(() => {
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+  window.removeEventListener("blur", handleWindowBlur);
+  window.removeEventListener("focus", handleWindowFocus);
+  window.removeEventListener("pagehide", handleHardLeave);
+  clearLeaveTimers();
+});
+
+const clearLeaveTimers = () => {
+  if (leaveTimeoutId) {
+    clearTimeout(leaveTimeoutId);
+    leaveTimeoutId = null;
+  }
+  if (leaveIntervalId) {
+    clearInterval(leaveIntervalId);
+    leaveIntervalId = null;
+  }
+  showLeaveWarning.value = false;
+  leaveCountdown.value = LEAVE_GRACE_SECONDS;
+};
+
+const isActiveTestRunning = () => started.value && !finished.value;
+
+const startLeaveCountdown = () => {
+  if (!isActiveTestRunning()) return;
+  if (leaveTimeoutId) return; // allaqachon hisoblanyapti
+
+  showLeaveWarning.value = true;
+  leaveCountdown.value = LEAVE_GRACE_SECONDS;
+
+  leaveIntervalId = window.setInterval(() => {
+    leaveCountdown.value--;
+  }, 1000);
+
+  leaveTimeoutId = window.setTimeout(() => {
+    disqualifyStudent();
+  }, LEAVE_GRACE_SECONDS * 1000);
+};
+
+const cancelLeaveCountdown = () => {
+  clearLeaveTimers();
+};
+
+const handleVisibilityChange = () => {
+  if (!isActiveTestRunning()) return;
+  if (document.hidden) {
+    startLeaveCountdown();
+  } else {
+    cancelLeaveCountdown();
+  }
+};
+
+const handleWindowBlur = () => {
+  if (!isActiveTestRunning()) return;
+  startLeaveCountdown();
+};
+
+const handleWindowFocus = () => {
+  if (!isActiveTestRunning()) return;
+  cancelLeaveCountdown();
+};
+
+// Tabni / brauzerni butunlay yopib yuborsa (5 soniya kutishning iloji
+// bo'lmaydi), to'g'ridan-to'g'ri diskvalifikatsiya qilamiz
+const handleHardLeave = () => {
+  if (!isActiveTestRunning()) return;
+  disqualifyStudent();
+};
+
+const disqualifyStudent = async () => {
+  clearLeaveTimers();
+  if (!isActiveTestRunning()) return;
+
+  const testId = test.value?.id;
+
+  started.value = false;
+  finished.value = false;
+  blocked.value = true;
+  test.value = null;
+
+  if (currentUserId && testId) {
+    try {
+      await supabase.from("test_blocks").insert({
+        user_id: currentUserId,
+        test_id: testId,
+        reason: "left_screen",
+      });
+    } catch (e) {
+      // unique constraint tufayli takror urinishda xato chiqishi mumkin,
+      // bu holatda ham foydalanuvchi baribir bloklangan holatda qoladi
+      console.warn("test_blocks insert xatosi:", e);
+    }
+  }
+};
+
+// --- Test topish / boshlash ---
+
+const checkExistingBlock = async (userId: string, testId: string) => {
+  const { data } = await supabase
+    .from("test_blocks")
+    .select("id, unblocked")
+    .eq("user_id", userId)
+    .eq("test_id", testId)
+    .maybeSingle();
+  return data && !data.unblocked;
+};
 
 const findTest = async () => {
   if (codeInput.value.length < 4) return;
@@ -275,6 +417,17 @@ const findTest = async () => {
     .eq("code", codeInput.value)
     .single();
   if (data) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const isBlocked = await checkExistingBlock(user.id, data.id);
+      if (isBlocked) {
+        blocked.value = true;
+        searching.value = false;
+        return;
+      }
+    }
     test.value = data;
   } else {
     notFound.value = true;
@@ -290,6 +443,9 @@ const startTest = () => {
   finished.value = false;
 };
 
+// Javob tanlanganda hech qanday to'g'ri/noto'g'ri belgisi ko'rsatilmaydi —
+// faqat tanlangan variant vizual jihatdan belgilanadi, ball fon tarafda
+// hisoblanadi va natija faqat test yakunida ko'rsatiladi
 const selectAnswer = (opt: string) => {
   if (selectedAnswer.value) return;
   selectedAnswer.value = opt;
@@ -309,11 +465,8 @@ const nextQuestion = () => {
 
 const saveResult = async () => {
   saving.value = true;
-  // import qo'shing
-
-  // saveResult funksiyasi ichida supabase insert dan keyin:
   await coinStore.fetchCoins();
-  await coinStore.addProgress(percent.value); // test natijasi %
+  await coinStore.addProgress(percent.value);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -326,7 +479,7 @@ const saveResult = async () => {
     percent: percent.value,
   });
   saving.value = false;
-  // Refresh my results
+
   const { data } = await supabase
     .from("test_results")
     .select("*, tests(title, subject)")
@@ -335,13 +488,15 @@ const saveResult = async () => {
     .limit(5);
   myResults.value = data || [];
 
-
-  // supabase insert dan keyin:
   await saveNotification(
     user.id,
-    'Test yakunlandi! 🎯',
+    "Test yakunlandi! 🎯",
     `${test.value.title} — ${percent.value}% natija`,
-    '🎯', `${score.value}/${test.value.questions.length}`, 'bg-orange-50', 'text-orange-500', 'bg-orange-50 text-orange-600'
+    "🎯",
+    `${score.value}/${test.value.questions.length}`,
+    "bg-orange-50",
+    "text-orange-500",
+    "bg-orange-50 text-orange-600",
   );
 };
 

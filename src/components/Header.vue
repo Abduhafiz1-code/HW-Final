@@ -17,7 +17,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import bg from '../images/Header_bg_img.jpg';
+import bg from '../images/Header_bg_img.png';
 import { useAuthStore } from '../stores/AuthStore';
 // import ThemeToggle from './ThemeToggle.vue';/
 const authStore = useAuthStore();

@@ -108,7 +108,7 @@
               'border-slate-200 hover:border-orange-300 hover:bg-orange-50':
                 !selected,
             }"
-              class="w-full px-5 py-3 text-slate-800 rounded-2xl border-2 text-left font-semibold text-sm transition disabled:cursor-default">
+              class="w-full px-5 py-3 text-slate-800 dark:text-white dark:hover:text-black rounded-2xl border-2 text-left font-semibold text-sm transition disabled:cursor-default">
               {{ opt }}
             </button>
           </div>

@@ -20,10 +20,10 @@
         <div class="space-y-2 mb-4">
           <div v-for="(pair, i) in wordPairs" :key="i" class="flex items-center gap-2">
             <input v-model="pair.word" :placeholder="`So'z ${i + 1}`"
-              class="flex-1 min-w-0 px-3 py-2 rounded-xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
+              class="flex-1 min-w-0 px-3 py-2 dark:text-orange-500 rounded-xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
             <span class="text-slate-400 font-bold flex-shrink-0">=</span>
             <input v-model="pair.translation" :placeholder="`Tarjima ${i + 1}`"
-              class="flex-1 min-w-0 px-3 py-2 rounded-xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-indigo-400" />
+              class="flex-1 min-w-0 px-3 py-2 dark:text-orange-500 rounded-xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-indigo-400" />
             <button v-if="wordPairs.length > 3" @click="wordPairs.splice(i, 1)"
               class="w-7 h-7 flex-shrink-0 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition text-xs flex items-center justify-center">✕</button>
           </div>
@@ -38,7 +38,7 @@
           <p class="text-sm font-semibold text-slate-700 mb-2">🤖 AI dan so'rash:</p>
           <div class="flex gap-2">
             <input v-model="aiTopic" placeholder="Mavzu: hayvonlar, ranglar..."
-              class="flex-1 min-w-0 px-3 py-2 rounded-xl border text-slate-800 border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
+              class="flex-1 min-w-0 px-3 py-2 rounded-xl dark:text-orange-500 border text-slate-800 border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
             <button @click="generateWords" :disabled="aiLoading"
               class="flex-shrink-0 px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-bold hover:bg-orange-600 transition disabled:opacity-60">
               {{ aiLoading ? "⏳" : "🤖 AI" }}

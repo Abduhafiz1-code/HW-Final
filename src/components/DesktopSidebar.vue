@@ -57,6 +57,7 @@ const desktopItems = computed(() => {
         { label: "Top", to: "/map", icon: Trophy },
         { label: "Chat", to: "/chat", icon: MessagesSquare },
         { label: "AI", to: "/ai-chat", icon: Bot },
+        { label: "Translate", to: "/translate", icon: Bot },
         { label: "Profil", to: "/user", icon: User },
     ];
 

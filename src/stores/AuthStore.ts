@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import supabase from "../supabase";
 
-const TEACHER_SECRET = "EFE_Education2026";
+const TEACHER_SECRET = "Socrati2026";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<any>(null);
@@ -40,6 +40,7 @@ export const useAuthStore = defineStore("auth", () => {
       await syncProfile();
       aiUsageCount.value = user.value.user_metadata?.ai_usage || 0;
       coopUsageCount.value = user.value.user_metadata?.coop_usage || 0;
+      subscribeToProfile();
     }
     supabase.auth.onAuthStateChange((_e, session) => {
       user.value = session?.user ?? null;
@@ -48,6 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
         syncProfile();
         aiUsageCount.value = user.value.user_metadata?.ai_usage || 0;
         coopUsageCount.value = user.value.user_metadata?.coop_usage || 0;
+        subscribeToProfile();
       }
     });
   };
@@ -101,8 +103,21 @@ export const useAuthStore = defineStore("auth", () => {
         },
       },
     });
-    if (err) error.value = err.message;
-    else user.value = data.user;
+    if (err) {
+      error.value = err.message;
+    } else {
+      user.value = data.user;
+      // profiles jadvaliga ham role bilan birga yozamiz
+      if (data.user) {
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          email: cleanEmail,
+          full_name: cleanName,
+          role: selectedRole,
+          is_premium: false,
+        });
+      }
+    }
     loading.value = false;
     return !err;
   };
@@ -137,6 +152,7 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
   };
 
+  // ✅ TUZATILDI: isPremium endi faqat BITTA, aniq mantiq bilan hisoblanadi
   const syncProfile = async () => {
     if (!user.value) return;
     const { data } = await supabase
@@ -149,13 +165,22 @@ export const useAuthStore = defineStore("auth", () => {
     role.value = (data?.role || meta.role || "student") as
       | "student"
       | "teacher";
-    premiumUntil.value = data?.premium_until || meta.premium_until || null;
-    const activeByDate = premiumUntil.value
-      ? new Date(premiumUntil.value).getTime() > Date.now()
+
+    // profiles jadvali asosiy manba (har doim eng yangi), meta faqat fallback
+    premiumUntil.value = data?.premium_until ?? meta.premium_until ?? null;
+
+    // Bazadagi flag (is_premium) ham, sanaga asoslangan flag ham hisobga olinadi:
+    // - Agar premium_until kelajakda bo'lsa -> premium FAOL
+    // - Agar premium_until o'tib ketgan bo'lsa -> premium TUGAGAN (is_premium flag'dan qat'iy nazar)
+    // - Agar premium_until umuman yo'q bo'lsa -> faqat is_premium flag'iga qaraladi (masalan, abadiy premium berilgan holatlar uchun)
+    const hasExpiryDate = Boolean(premiumUntil.value);
+    const activeByDate = hasExpiryDate
+      ? new Date(premiumUntil.value as string).getTime() > Date.now()
       : false;
-    isPremium.value = Boolean(
-      data?.is_premium || meta.is_premium || activeByDate,
-    );
+    const flagPremium = Boolean(data?.is_premium ?? meta.is_premium ?? false);
+
+    isPremium.value = hasExpiryDate ? activeByDate : flagPremium;
+
     aiUsageCount.value = meta.ai_usage || 0;
     coopUsageCount.value = meta.coop_usage || 0;
 
@@ -243,6 +268,43 @@ export const useAuthStore = defineStore("auth", () => {
     });
   };
 
+  let profileChannel: any = null;
+
+  const subscribeToProfile = () => {
+    if (!user.value) return;
+
+    // ✅ eski kanal bo'lsa, avval uni olib tashlaymiz
+    if (profileChannel) {
+      supabase.removeChannel(profileChannel);
+      profileChannel = null;
+    }
+
+    profileChannel = supabase
+      .channel(`profile-${user.value.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${user.value.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          const newPremiumUntil = updated.premium_until || null;
+          premiumUntil.value = newPremiumUntil;
+
+          const hasExpiryDate = Boolean(newPremiumUntil);
+          const activeByDate = hasExpiryDate
+            ? new Date(newPremiumUntil).getTime() > Date.now()
+            : false;
+          isPremium.value = hasExpiryDate
+            ? activeByDate
+            : Boolean(updated.is_premium);
+        },
+      )
+      .subscribe();
+  };
   return {
     user,
     role,
@@ -267,5 +329,6 @@ export const useAuthStore = defineStore("auth", () => {
     incrementAIUsage,
     incrementCoopUsage,
     activatePremium,
+    subscribeToProfile,
   };
 });

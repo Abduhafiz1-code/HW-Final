@@ -1,6 +1,6 @@
 <template>
-  <div class="relative inline-block font-sans">
-    <button @click="isOpen = !isOpen"
+  <div ref="dropdownRef" class="relative inline-block font-sans">
+    <button @click.stop="isOpen = !isOpen"
       class="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm hover:bg-gray-50 transition-all border border-gray-200 hover:border-orange-200 active:scale-95">
       <span class="text-xl">🔥</span>
       <span class="text-orange-500 font-black text-base">{{ streakCount }}</span>
@@ -46,10 +46,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import supabase from '../supabase';
 
 const isOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    dropdownRef.value &&
+    !dropdownRef.value.contains(event.target as Node)
+  ) {
+    isOpen.value = false;
+  }
+};
 const streakCount = ref(0);
 const daysNames = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
 const weekStatus = ref(daysNames.map(name => ({ name, isCompleted: false, isToday: false, isFuture: false })));
@@ -107,7 +117,14 @@ const updateStreak = async () => {
   }
 };
 
-onMounted(() => updateStreak());
+onMounted(() => {
+  updateStreak();
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>

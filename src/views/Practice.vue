@@ -27,7 +27,7 @@
           <div>
             <label class="text-sm font-semibold text-slate-700 block mb-1">Qo'shimcha mavzu (ixtiyoriy)</label>
             <input v-model="customTopic" placeholder="Masalan: Pythagoras teoremasi"
-              class="w-full px-4 py-3 rounded-2xl text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
+              class="w-full px-4 py-3 rounded-2xl dark:text-white text-slate-800 border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-orange-400" />
           </div>
           <div class="mt-4">
             <label class="text-sm font-semibold text-slate-700 block mb-1">Savol soni</label>
@@ -85,7 +85,7 @@
               'border-red-400 bg-red-50 text-red-600': selected === opt && opt !== current.answer,
               'border-slate-200 hover:border-orange-300 hover:bg-orange-50': !selected,
             }"
-              class="w-full px-5 py-3 rounded-2xl border-2 text-left font-semibold text-sm text-slate-800 transition disabled:cursor-default">
+              class="w-full px-5 py-3 rounded-2xl  border-2 text-left font-semibold text-sm text-slate-800 transition disabled:cursor-default">
               {{ opt }}
             </button>
           </div>

@@ -3,39 +3,50 @@
     <div class="max-w-5xl mx-auto flex flex-col gap-6">
       <section class="bg-white rounded-3xl shadow-lg p-6">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 sm:gap-4">
             <div
-              class="h-24 w-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 text-4xl font-bold text-white shadow-lg">
+              class="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 text-2xl sm:text-4xl font-bold text-white shadow-lg shrink-0">
               {{ authStore.displayInitial }}</div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h1 class="text-3xl font-bold text-slate-900">{{ authStore.displayName }}</h1>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-xl sm:text-3xl font-bold text-slate-900 truncate">{{ authStore.displayName }}</h1>
                 <span v-if="authStore.isPremium"
                   class="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-black rounded-lg">👑 Premium</span>
                 <span v-if="authStore.isTeacher"
                   class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-black rounded-lg">👨‍🏫 Teacher</span>
               </div>
-              <p class="mt-1 text-sm text-slate-600">{{ authStore.user?.email }}</p>
+              <p class="mt-1 text-sm text-slate-600 truncate">{{ authStore.user?.email }}</p>
             </div>
           </div>
-          <div class="flex flex-wrap gap-3">
+          <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
             <RouterLink v-if="authStore.isTeacher" to="/teacher"
-              class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
+              class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
               👨‍🏫 Teacher Panel</RouterLink>
 
             <RouterLink v-if="!authStore.isPremium" to="/premium"
-              class="flex items-center gap-1 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold text-sm shadow hover:opacity-90 transition">
+              class="flex-1 sm:flex-none justify-center flex items-center gap-1 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold text-sm shadow hover:opacity-90 transition">
               👑 Premium</RouterLink>
             <button @click="handleLogout"
-              class="px-4 py-2 rounded-xl border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition">Chiqish
+              class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition">Chiqish
               ↪</button>
           </div>
         </div>
       </section>
-      <div class="flex justify-between items-center">
-        <button @click="openEdit"
-          class="self-start px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition">Edit
-          profile</button>
+      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button @click="openEdit"
+            class="self-start px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition">Edit
+            profile</button>
+          <RouterLink to="/feedback" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm
+         bg-indigo-50 text-indigo-600 border border-indigo-100
+         dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-400/20
+         transition-all duration-200
+         hover:bg-indigo-100 hover:-translate-y-0.5
+         dark:hover:bg-indigo-500/25
+         active:scale-95">
+            💬 Fikr bildirish
+          </RouterLink>
+        </div>
         <ThemeToggle></ThemeToggle>
       </div>
       <!-- Usage stats -->
@@ -43,9 +54,9 @@
         <div class="bg-white rounded-3xl shadow p-5">
           <span class="text-sm text-slate-500">AI So'rovlar</span>
           <div class="mt-4 text-3xl font-bold" :class="authStore.isPremium ? 'text-green-600' : 'text-orange-500'">
-            {{ authStore.isPremium ? '∞' : `${authStore.aiUsageCount}/3` }}</div>
+            {{ authStore.isPremium ? '∞' : `${authStore.aiUsageCount}/10` }}</div>
           <p class="mt-2 text-xs text-slate-500">
-            {{ authStore.isPremium ? 'Cheksiz' : `${3 - authStore.aiUsageCount} ta qoldi` }}</p>
+            {{ authStore.isPremium ? 'Cheksiz' : `${10 - authStore.aiUsageCount} ta qoldi` }}</p>
         </div>
         <div class="bg-white rounded-3xl shadow p-5">
           <span class="text-sm text-slate-500">Co-op testlar</span>
@@ -98,8 +109,9 @@
       </section>
     </div>
 
-    <div v-if="editing" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+    <div v-if="editing"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 overflow-y-auto">
+      <div class="w-full max-w-md rounded-3xl bg-white p-5 sm:p-6 shadow-2xl my-auto">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-black text-slate-900">Profilni tahrirlash</h2>
           <button @click="editing = false" class="h-9 w-9 rounded-xl bg-slate-100 text-slate-600">x</button>

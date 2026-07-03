@@ -1,17 +1,17 @@
 <template>
-  <div class="min-h-screen bg-[#F7F9FC] dark:bg-slate-900 px-4 pt-6 pb-28">
+  <div class="min-h-screen bg-[#F7F9FC] dark:bg-slate-900 px-3 sm:px-4 pt-6 pb-28">
     <div class="max-w-3xl mx-auto">
 
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div>
-          <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+        <div class="min-w-0">
+          <h1 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">
             👨‍🏫 O'qituvchi Panel
           </h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ authStore.displayName }}</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ authStore.displayName }}</p>
         </div>
         <button @click="showCreateTest = true"
-          class="w-full sm:w-auto px-4 py-2.5 bg-orange-500 text-white font-bold rounded-2xl text-sm hover:bg-orange-600 transition shadow-sm active:scale-95">
+          class="w-full sm:w-auto px-4 py-2.5 bg-orange-500 text-white font-bold rounded-2xl text-sm hover:bg-orange-600 transition shadow-sm active:scale-95 flex-shrink-0">
           + Test yaratish
         </button>
       </div>
@@ -19,28 +19,28 @@
       <!-- Stats -->
       <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
         <div
-          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-4 text-center shadow-sm">
-          <p class="text-xl sm:text-2xl font-black text-orange-500">{{ tests.length }}</p>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Testlar</p>
+          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-2.5 sm:p-4 text-center shadow-sm min-w-0">
+          <p class="text-lg sm:text-2xl font-black text-orange-500">{{ tests.length }}</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">Testlar</p>
         </div>
         <div
-          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-4 text-center shadow-sm">
-          <p class="text-xl sm:text-2xl font-black text-indigo-500">{{ groups.length }}</p>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Guruhlar</p>
+          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-2.5 sm:p-4 text-center shadow-sm min-w-0">
+          <p class="text-lg sm:text-2xl font-black text-indigo-500">{{ groups.length }}</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">Guruhlar</p>
         </div>
         <div
-          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-4 text-center shadow-sm">
-          <p class="text-xl sm:text-2xl font-black text-green-500">{{ totalStudents }}</p>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">O'quvchilar</p>
+          class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-2.5 sm:p-4 text-center shadow-sm min-w-0">
+          <p class="text-lg sm:text-2xl font-black text-green-500">{{ totalStudents }}</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">O'quvchilar</p>
         </div>
       </div>
 
-      <!-- Tabs -->
+      <!-- Tabs: torroq ekranlarda gorizontal scroll bo'ladi, matn siqilib ketmaydi -->
       <div
-        class="flex rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 mb-5 shadow-sm">
+        class="flex  overflow-x-auto no-scrollbar rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 mb-5 shadow-sm gap-3">
         <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
           :class="activeTab === t.id ? 'bg-orange-500 text-white shadow' : 'text-slate-600 dark:text-slate-400'"
-          class="flex-1 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition">
+          class="flex-shrink-0 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition whitespace-nowrap">
           {{ t.label }}
         </button>
       </div>
@@ -49,7 +49,7 @@
       <div v-if="activeTab === 'tests'" class="space-y-3">
         <div v-if="loading" class="text-center py-10 text-slate-400">⏳ Yuklanmoqda...</div>
         <div v-else-if="tests.length === 0"
-          class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
+          class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 px-4">
           <div class="text-5xl mb-3">📋</div>
           <p class="text-slate-500 dark:text-slate-400 text-sm">Hali test yaratmadingiz</p>
           <button @click="showCreateTest = true"
@@ -61,34 +61,34 @@
         <div v-for="test in tests" :key="test.id"
           class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div class="flex flex-col sm:flex-row sm:items-start gap-3">
-            <div class="flex-1">
-              <p class="font-black text-slate-900 dark:text-white">{{ test.title }}</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <div class="flex-1 min-w-0">
+              <p class="font-black text-slate-900 dark:text-white truncate">{{ test.title }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                 {{ test.subject }} • {{ test.questions.length }} savol
               </p>
               <div class="flex items-center gap-3 mt-2 flex-wrap">
                 <span
-                  class="text-xs bg-orange-50 dark:bg-orange-900/30 text-orange-600 font-black px-3 py-1 rounded-xl border border-orange-100 dark:border-orange-800">
+                  class="text-xs bg-orange-50 dark:bg-orange-900/30 text-orange-600 font-black px-3 py-1 rounded-xl border border-orange-100 dark:border-orange-800 whitespace-nowrap">
                   Kod: {{ test.code }}
                 </span>
                 <button @click="copyCode(test.code)"
-                  class="text-xs text-indigo-500 font-semibold hover:text-indigo-700 transition">
+                  class="text-xs text-indigo-500 font-semibold hover:text-indigo-700 transition whitespace-nowrap">
                   📋 Nusxa
                 </button>
               </div>
             </div>
             <!-- Tugmalar mobilda to'liq kenglikda -->
-            <div class="flex gap-2 sm:flex-col sm:gap-1.5">
+            <div class="grid grid-cols-3 sm:flex sm:flex-col gap-2 sm:gap-1.5 flex-shrink-0">
               <button @click="openAssign(test)"
-                class="flex-1 sm:flex-none px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-xs font-bold rounded-xl hover:bg-indigo-100 transition">
+                class="px-2 sm:px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-indigo-100 transition whitespace-nowrap">
                 📤 Yuborish
               </button>
               <button @click="viewResults(test)"
-                class="flex-1 sm:flex-none px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 transition">
+                class="px-2 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-slate-200 transition whitespace-nowrap">
                 📊 Natija
               </button>
               <button @click="deleteTest(test.id)"
-                class="px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-xs font-bold rounded-xl hover:bg-red-100 transition">
+                class="px-2 sm:px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-red-100 transition">
                 🗑
               </button>
             </div>
@@ -96,48 +96,52 @@
         </div>
       </div>
 
+      <!-- Blocked tab -->
+      <TeacherBlockedStudents v-if="activeTab === 'blocked'" />
+
       <!-- GROUPS tab -->
       <div v-else-if="activeTab === 'groups'" class="space-y-3">
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <p class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">Yangi guruh yaratish</p>
-          <div class="flex gap-2">
+          <div class="flex flex-col sm:flex-row gap-2">
             <input v-model="newGroupName" placeholder="Guruh nomi (9-A)"
-              class="flex-1 px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:outline-none focus:border-orange-400" />
+              class="flex-1 min-w-0 px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:outline-none focus:border-orange-400" />
             <button @click="createGroup" :disabled="!newGroupName.trim()"
-              class="px-4 py-2 bg-orange-500 text-white font-bold rounded-xl text-sm hover:bg-orange-600 transition disabled:opacity-50">
+              class="px-4 py-2 bg-orange-500 text-white font-bold rounded-xl text-sm hover:bg-orange-600 transition disabled:opacity-50 flex-shrink-0">
               Yaratish
             </button>
           </div>
         </div>
         <div v-for="group in groups" :key="group.id"
           class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-black text-slate-900 dark:text-white">{{ group.name }}</p>
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="font-black text-slate-900 dark:text-white truncate">{{ group.name }}</p>
               <p class="text-xs text-slate-500 dark:text-slate-400">
                 Kirish kodi: <span class="font-bold text-orange-500">{{ group.code }}</span>
               </p>
             </div>
-            <button @click="deleteGroup(group.id)" class="text-xs text-red-400 hover:text-red-600 p-2">🗑</button>
+            <button @click="deleteGroup(group.id)"
+              class="text-xs text-red-400 hover:text-red-600 p-2 flex-shrink-0">🗑</button>
           </div>
         </div>
       </div>
 
       <!-- RESULTS tab -->
-      <div v-else class="space-y-3">
+      <div v-else-if="activeTab === 'results'" class="space-y-3">
         <div v-if="!selectedTest"
-          class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
+          class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 px-4">
           <div class="text-5xl mb-3">📊</div>
           <p class="text-slate-500 dark:text-slate-400 text-sm">Testlar tabidan test tanlang</p>
         </div>
         <div v-else>
           <div
-            class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-4 mb-4 flex items-center justify-between">
-            <div>
-              <p class="font-black text-slate-900 dark:text-white">{{ selectedTest.title }}</p>
+            class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-4 mb-4 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="font-black text-slate-900 dark:text-white truncate">{{ selectedTest.title }}</p>
               <p class="text-xs text-orange-600">Kod: {{ selectedTest.code }}</p>
             </div>
-            <button @click="selectedTest = null" class="text-xs text-slate-500 p-1">✕</button>
+            <button @click="selectedTest = null" class="text-xs text-slate-500 p-1 flex-shrink-0">✕</button>
           </div>
           <div v-if="testResults.length === 0"
             class="text-center py-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
@@ -154,7 +158,7 @@
               </p>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              <div class="w-16 sm:w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+              <div class="w-14 sm:w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                 <div :class="r.percent >= 70 ? 'bg-green-500' : 'bg-red-400'" class="h-2 rounded-full"
                   :style="{ width: `${r.percent}%` }"></div>
               </div>
@@ -168,18 +172,18 @@
 
     <!-- Create test modal -->
     <div v-if="showCreateTest"
-      class="fixed inset-0 bg-black/50 z-50 flex mb-18 items-end sm:items-center justify-center sm:px-4 sm:pb-4">
+      class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <div
-        class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
+        class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
         <div
-          class="sticky top-0 bg-white dark:bg-slate-800 px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between rounded-t-3xl">
+          class="sticky top-0 bg-white dark:bg-slate-800 px-4 sm:px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between rounded-t-3xl z-10">
           <h2 class="font-black text-lg text-slate-900 dark:text-white">Test yaratish</h2>
           <button @click="showCreateTest = false"
-            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+            class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 flex-shrink-0">
             ✕
           </button>
         </div>
-        <div class="p-5 space-y-4">
+        <div class="p-4 sm:p-5 space-y-4">
           <div>
             <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Test nomi *</label>
             <input v-model="newTest.title" placeholder="Algebra — 1-bob"
@@ -204,11 +208,11 @@
           <div
             class="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-4 border border-orange-100 dark:border-orange-800">
             <p class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2">🤖 AI bilan savollar yaratish</p>
-            <div class="flex gap-2 mb-2">
+            <div class="flex flex-col sm:flex-row gap-2 mb-2">
               <input v-model="aiTestTopic" placeholder="Mavzu: Kvadrat tenglamalar..."
-                class="flex-1 px-3 py-2 rounded-xl text-slate-800 dark:text-white border border-orange-200 dark:border-orange-700 bg-white dark:bg-slate-700 text-sm focus:outline-none" />
+                class="flex-1 min-w-0 px-3 py-2 rounded-xl text-slate-800 dark:text-white border border-orange-200 dark:border-orange-700 bg-white dark:bg-slate-700 text-sm focus:outline-none" />
               <select v-model="aiCount"
-                class="px-2 text-slate-800 dark:text-white py-2 rounded-xl border border-orange-200 dark:border-orange-700 bg-white dark:bg-slate-700 text-sm">
+                class="px-2 text-slate-800 dark:text-white py-2 rounded-xl border border-orange-200 dark:border-orange-700 bg-white dark:bg-slate-700 text-sm flex-shrink-0">
                 <option value="5">5 ta</option>
                 <option value="10">10 ta</option>
                 <option value="15">15 ta</option>
@@ -228,7 +232,7 @@
             <div v-for="(q, i) in newTest.questions" :key="i"
               class="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 mb-2 border border-slate-200 dark:border-slate-600">
               <div class="flex items-start justify-between gap-2">
-                <p class="text-sm font-semibold text-slate-900 dark:text-white flex-1">
+                <p class="text-sm font-semibold text-slate-900 dark:text-white flex-1 min-w-0">
                   {{ i + 1 }}. {{ q.question }}
                 </p>
                 <button @click="newTest.questions.splice(i, 1)"
@@ -246,7 +250,7 @@
             <div class="grid grid-cols-2 gap-2 mb-2">
               <input v-for="(_, i) in 4" :key="i" v-model="manualQ.options[i]"
                 :placeholder="`Variant ${['A', 'B', 'C', 'D'][i]}`"
-                class="px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-xs focus:outline-none" />
+                class="px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-xs focus:outline-none min-w-0" />
             </div>
             <select v-model="manualQ.answer"
               class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none">
@@ -273,9 +277,10 @@
     <!-- Assign modal -->
     <div v-if="showAssignModal"
       class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-4">
-      <div class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-sm p-6 shadow-2xl">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-sm p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
         <h2 class="font-black text-lg text-slate-900 dark:text-white mb-1">Guruhga yuborish</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ assigningTest?.title }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 truncate">{{ assigningTest?.title }}</p>
         <div v-if="groups.length === 0" class="text-center py-6">
           <p class="text-slate-400 text-sm">Hali guruh yaratmadingiz</p>
           <button @click="showAssignModal = false; activeTab = 'groups'"
@@ -287,7 +292,7 @@
           <button v-for="group in groups" :key="group.id" @click="toggleGroup(group.id)"
             :class="selectedGroups.includes(group.id) ? 'border-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700'"
             class="w-full px-4 py-3 rounded-2xl border-2 text-left transition">
-            <p class="font-bold text-sm text-slate-900 dark:text-white">{{ group.name }}</p>
+            <p class="font-bold text-sm text-slate-900 dark:text-white truncate">{{ group.name }}</p>
             <p class="text-xs text-slate-500 dark:text-slate-400">Kod: {{ group.code }}</p>
           </button>
         </div>
@@ -306,7 +311,7 @@
 
     <!-- Toast -->
     <div v-if="copyToast"
-      class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl z-50 whitespace-nowrap">
+      class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl z-50 whitespace-nowrap max-w-[90vw] truncate">
       ✅ Kod nusxalandi!
     </div>
   </div>
@@ -316,13 +321,14 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/AuthStore";
 import supabase from "../supabase";
 import { askAIJson } from "../lib/ai";
-
+import TeacherBlockedStudents from '../components/TeacherBlockedStudents.vue';
 const authStore = useAuthStore();
 const activeTab = ref("tests");
 const tabs = [
   { id: "tests", label: "📋 Testlar" },
   { id: "groups", label: "👥 Guruhlar" },
   { id: "results", label: "📊 Natijalar" },
+  { id: "blocked", label: "🚫 Bloklangan" },
 ];
 const showCreateTest = ref(false);
 const loading = ref(false); const saving = ref(false); const saveError = ref("");
@@ -398,8 +404,17 @@ const deleteTest = async (id: string) => {
 };
 
 const viewResults = async (test: any) => {
-  selectedTest.value = test; activeTab.value = "results";
-  const { data } = await supabase.from("test_results").select("*, profiles(full_name, email)").eq("test_id", test.id).order("created_at", { ascending: false });
+  selectedTest.value = test;
+  activeTab.value = "results";
+  const { data, error } = await supabase
+    .from("test_results")
+    .select("*, profiles(full_name, email)")
+    .eq("test_id", test.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("test_results yuklashda xato:", error);
+  }
   testResults.value = data || [];
 };
 
@@ -465,3 +480,15 @@ const assignTest = async () => {
   assigning.value = false;
 };
 </script>
+
+<style scoped>
+/* Scrollbarni yashirish, lekin scroll funksiyasini saqlash (tablar qatori uchun) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

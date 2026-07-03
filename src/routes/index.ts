@@ -12,6 +12,12 @@ const router = createRouter({
     },
     { path: "/", name: "home", component: HomeView },
     { path: "/map", name: "map", component: () => import("../views/Map.vue") },
+    {
+      path: "/feedback",
+      name: "Feedback",
+      component: () => import("../views/Feedback.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
 
     {
       path: "/ai-chat",
