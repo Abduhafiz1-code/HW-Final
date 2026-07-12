@@ -130,13 +130,26 @@ const elapsed = ref(0); let timer: any;
 const validPairs = computed(() => wordPairs.value.filter((p) => p.word.trim() && p.translation.trim()));
 
 const generateWords = async () => {
+  if (!aiTopic.value.trim()) {
+    alert("Iltimos, AI uchun mavzu kiriting.");
+    return;
+  }
+
   aiLoading.value = true;
   const pairs = await askAIJson<WordPair[]>(
-    `"${aiTopic.value}" mavzusida foydalanuvchi so'ragan tilda so'z va o'zbekcha tarjimasini JSON: [{"word":"...","translation":"..."}]. Boshqa hech narsa yozma.`,
+    `"${aiTopic.value}" mavzusida 40 ta so'z va o'zbekcha tarjimasini JSON: [{"word":"...","translation":"..."}]. Boshqa hech narsa yozma.`,
     []
   );
-  if (pairs.length) wordPairs.value = pairs.slice(0, 6);
-  else alert("AI xatosi. Qayta urinib ko'ring.");
+
+  const cleanedPairs = (Array.isArray(pairs) ? pairs : [])
+    .filter((p) => p && typeof p.word === "string" && typeof p.translation === "string" && p.word.trim() && p.translation.trim())
+    .slice(0, 12) as WordPair[];
+
+  if (cleanedPairs.length) {
+    wordPairs.value = cleanedPairs;
+  } else {
+    alert("AI xatosi. Qayta urinib ko'ring.");
+  }
   aiLoading.value = false;
 };
 
