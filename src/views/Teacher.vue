@@ -124,6 +124,20 @@
             <button @click="deleteGroup(group.id)"
               class="text-xs text-red-400 hover:text-red-600 p-2 flex-shrink-0">🗑</button>
           </div>
+          <div
+            class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2">
+            <span v-if="group.telegram_status === 'linked'"
+              class="text-xs bg-green-50 dark:bg-green-900/20 text-green-600 font-bold px-3 py-1 rounded-xl">
+              ✅ Telegramga ulangan
+            </span>
+            <span v-else class="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-600 font-bold px-3 py-1 rounded-xl">
+              ⚠️ Ulanmagan
+            </span>
+            <button @click="openTelegramLink(group)"
+              class="text-xs text-indigo-500 font-bold hover:text-indigo-700 transition">
+              🔗 {{ group.telegram_status === 'linked' ? "Qayta ulash" : "Ulash" }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -141,7 +155,13 @@
               <p class="font-black text-slate-900 dark:text-white truncate">{{ selectedTest.title }}</p>
               <p class="text-xs text-orange-600">Kod: {{ selectedTest.code }}</p>
             </div>
-            <button @click="selectedTest = null" class="text-xs text-slate-500 p-1 flex-shrink-0">✕</button>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button @click="openSendResults" :disabled="testResults.length === 0"
+                class="text-xs bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl disabled:opacity-40">
+                📤 Telegramga
+              </button>
+              <button @click="selectedTest = null" class="text-xs text-slate-500 p-1">✕</button>
+            </div>
           </div>
           <div v-if="testResults.length === 0"
             class="text-center py-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
@@ -307,8 +327,55 @@
           </button>
         </div>
       </div>
+    </div><!-- Telegram link modal -->
+    <div v-if="showTelegramModal"
+      class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-4">
+      <div class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-sm p-6 shadow-2xl">
+        <h2 class="font-black text-lg text-slate-900 dark:text-white mb-1">Telegramga ulash</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ linkingGroup?.name }}</p>
+        <ol class="text-sm text-slate-700 dark:text-slate-300 space-y-2 mb-4 list-decimal list-inside">
+          <li>Botni kanalingizga <b>admin</b> qilib qo'shing</li>
+          <li>Kanalga quyidagi kodni xabar qilib yuboring:</li>
+        </ol>
+        <div class="bg-slate-100 dark:bg-slate-700 rounded-xl px-4 py-3 text-center mb-4">
+          <span
+            class="text-xl font-black tracking-widest text-orange-500">#{{ linkingGroup?.telegram_link_code }}</span>
+        </div>
+        <button @click="copyLinkCode" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-2xl text-sm mb-2">
+          📋 Kodni nusxalash
+        </button>
+        <button @click="showTelegramModal = false"
+          class="w-full py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-sm">
+          Yopish
+        </button>
+      </div>
     </div>
 
+    <!-- Send results modal -->
+    <div v-if="showSendResultsModal"
+      class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-sm p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <h2 class="font-black text-lg text-slate-900 dark:text-white mb-4">Qaysi guruhga yuborilsin?</h2>
+        <div v-if="linkedGroups.length === 0" class="text-center py-6">
+          <p class="text-slate-400 text-sm">Hech qanday guruh Telegramga ulanmagan</p>
+        </div>
+        <div v-else class="space-y-2 mb-4">
+          <button v-for="g in linkedGroups" :key="g.id" @click="sendResultsToGroup(g.id)" :disabled="sendingResults"
+            class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-left hover:border-indigo-400 transition disabled:opacity-50">
+            <p class="font-bold text-sm text-slate-900 dark:text-white">{{ g.name }}</p>
+          </button>
+        </div>
+        <p v-if="sendResultsMsg" class="text-sm text-center mb-3"
+          :class="sendResultsError ? 'text-red-500' : 'text-green-600'">
+          {{ sendResultsMsg }}
+        </p>
+        <button @click="showSendResultsModal = false"
+          class="w-full py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-sm">
+          Yopish
+        </button>
+      </div>
+    </div>
     <!-- Toast -->
     <div v-if="copyToast"
       class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl z-50 whitespace-nowrap max-w-[90vw] truncate">
@@ -442,6 +509,67 @@ const createGroup = async () => {
 const deleteGroup = async (id: string) => {
   await supabase.from("groups").delete().eq("id", id);
   groups.value = groups.value.filter((g: any) => g.id !== id);
+};
+const showTelegramModal = ref(false);
+const linkingGroup = ref<any>(null);
+const showSendResultsModal = ref(false);
+const sendingResults = ref(false);
+const sendResultsMsg = ref("");
+const sendResultsError = ref(false);
+
+const linkedGroups = computed(() => groups.value.filter((g: any) => g.telegram_status === "linked"));
+
+const openTelegramLink = (group: any) => {
+  linkingGroup.value = group;
+  showTelegramModal.value = true;
+};
+
+const copyLinkCode = () => {
+  navigator.clipboard.writeText(`#${linkingGroup.value.telegram_link_code}`);
+  copyToast.value = true;
+  setTimeout(() => (copyToast.value = false), 2000);
+};
+
+const openSendResults = () => {
+  sendResultsMsg.value = "";
+  sendResultsError.value = false;
+  showSendResultsModal.value = true;
+};
+
+const sendResultsToGroup = async (groupId: string) => {
+  sendingResults.value = true;
+  sendResultsMsg.value = "";
+  sendResultsError.value = false;
+  const { data: { session } } = await supabase.auth.getSession();
+  try {
+    const res = await fetch(
+      "https://gnuwumkdffpnltrglgxk.supabase.co/functions/v1/send-telegram",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          type: "send_results",
+          testId: selectedTest.value.id,
+          groupId,
+        }),
+      },
+    );
+    const json = await res.json();
+    if (res.ok && json.success) {
+      sendResultsMsg.value = `✅ ${json.sent} ta natija yuborildi!`;
+      setTimeout(() => (showSendResultsModal.value = false), 1500);
+    } else {
+      sendResultsError.value = true;
+      sendResultsMsg.value = `❌ ${json.error || "Xato yuz berdi"}`;
+    }
+  } catch (e: any) {
+    sendResultsError.value = true;
+    sendResultsMsg.value = `❌ ${e.message}`;
+  }
+  sendingResults.value = false;
 };
 const showAssignModal = ref(false);
 const assigningTest = ref<any>(null);

@@ -263,7 +263,7 @@ const score = ref(0);
 const selectedAnswer = ref("");
 const myResults = ref<any[]>([]);
 const blocked = ref(false);
-
+const userAnswers = ref<{ question_index: number; chosen_option: number; correct_option: number; is_correct: boolean }[]>([]);
 // --- Anti-cheat: ekrandan uzoqlashishni kuzatish ---
 const LEAVE_GRACE_SECONDS = 5;
 const showLeaveWarning = ref(false);
@@ -439,6 +439,7 @@ const startTest = () => {
   currentIdx.value = 0;
   score.value = 0;
   selectedAnswer.value = "";
+  userAnswers.value = [];   // <-- shu qatorni qo'sh
   started.value = true;
   finished.value = false;
 };
@@ -449,7 +450,19 @@ const startTest = () => {
 const selectAnswer = (opt: string) => {
   if (selectedAnswer.value) return;
   selectedAnswer.value = opt;
-  if (opt === currentQ.value.answer) score.value++;
+
+  const isCorrect = opt === currentQ.value.answer;
+  if (isCorrect) score.value++;
+
+  const chosenIdx = currentQ.value.options.indexOf(opt);
+  const correctIdx = currentQ.value.options.indexOf(currentQ.value.answer);
+
+  userAnswers.value.push({
+    question_index: currentIdx.value,
+    chosen_option: chosenIdx,
+    correct_option: correctIdx,
+    is_correct: isCorrect,
+  });
 };
 
 const nextQuestion = () => {
@@ -462,7 +475,6 @@ const nextQuestion = () => {
     selectedAnswer.value = "";
   }
 };
-
 const saveResult = async () => {
   saving.value = true;
   await coinStore.fetchCoins();
@@ -471,13 +483,32 @@ const saveResult = async () => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
-  await supabase.from("test_results").insert({
-    user_id: user.id,
-    test_id: test.value.id,
-    score: score.value,
-    total: test.value.questions.length,
-    percent: percent.value,
-  });
+
+  const { data: resultRow, error: resultError } = await supabase
+    .from("test_results")
+    .insert({
+      user_id: user.id,
+      test_id: test.value.id,
+      score: score.value,
+      total: test.value.questions.length,
+      percent: percent.value,
+    })
+    .select()
+    .single();
+
+  if (!resultError && resultRow) {
+    const answerRows = userAnswers.value.map((a) => ({
+      result_id: resultRow.id,
+      question_index: a.question_index,
+      chosen_option: a.chosen_option,
+      correct_option: a.correct_option,
+      is_correct: a.is_correct,
+    }));
+    if (answerRows.length > 0) {
+      await supabase.from("test_answers").insert(answerRows);
+    }
+  }
+
   saving.value = false;
 
   const { data } = await supabase
@@ -499,7 +530,6 @@ const saveResult = async () => {
     "bg-orange-50 text-orange-600",
   );
 };
-
 const retakeTest = () => {
   startTest();
 };
