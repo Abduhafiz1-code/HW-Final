@@ -56,7 +56,7 @@ const router = createRouter({
       path: "/translate",
       name: "translate",
       component: () => import("../views/Translate.vue"),
-      meta: { hideSidebar: false, hideMobileNav: false },
+      meta: { hideSidebar: false, hideMobileNav: true },
     },
     {
       path: "/premium",
