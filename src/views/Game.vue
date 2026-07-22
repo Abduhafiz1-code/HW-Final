@@ -281,7 +281,7 @@
             <div class="flex items-center justify-center gap-2">
               <span class="text-3xl font-black tracking-[0.2em] text-red-500">{{ battleRoomCode }}</span>
               <button @click="copyRoomCode"
-                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-90">
+                class="w-9 h-9 rounded-xl  bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-90">
                 <Check v-if="codeCopied" :size="15" class="text-green-500" />
                 <Copy v-else :size="15" />
               </button>
@@ -372,7 +372,7 @@
                 <div class="grid grid-cols-1 gap-2">
                   <button v-for="(opt, i) in activeQuestion?.options" :key="i" @click="castBattleVote(i)"
                     :disabled="!!battleRevealResult || battleVoteDisabled"
-                    class="min-h-14 py-3 px-4 rounded-2xl border-2 text-left text-sm font-bold flex items-center justify-between gap-2 transition-all active:scale-[0.98] disabled:active:scale-100"
+                    class="min-h-14 py-3 px-4 text-slate-800   rounded-2xl border-2 text-left text-sm font-bold flex items-center justify-between gap-2 transition-all active:scale-[0.98] disabled:active:scale-100"
                     :class="battleOptionClass(i)">
                     <span>{{ ['A', 'B', 'C', 'D'][i] }}. {{ opt }}</span>
                     <span class="text-xs font-black text-slate-400 flex-shrink-0">{{ battleVotes[i] || 0 }}</span>
