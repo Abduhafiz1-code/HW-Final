@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { useAuthStore } from "../stores/AuthStore";
-const authStore = useAuthStore();
+import { GraduationCap } from '@lucide/vue';
 </script>
 
 <template>
-    <div>
-        <router-link v-if="authStore.isTeacher" to="/teacher">
-            🧑🏻‍🏫
-        </router-link>
-    </div>
+    <!-- Parent (FAB) already gates visibility by role and supplies the
+         circular button classes via attr fallthrough onto this root link. -->
+    <RouterLink to="/teacher" class="flex items-center justify-center">
+        <GraduationCap :size="24" />
+    </RouterLink>
 </template>
-
-<style lang="scss" scoped></style>

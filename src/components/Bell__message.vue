@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { Bell } from "@lucide/vue";
+import { Bell } from '@lucide/vue';
 import { ref, onMounted, watch } from "vue";
 import supabase from "../supabase";
 import { useRoute } from "vue-router";

@@ -1,162 +1,363 @@
 <template>
-  <div class="min-h-screen bg-[#F7F9FC] px-5 pb-24 pt-6">
-    <div class="max-w-5xl mx-auto flex flex-col gap-6">
-      <section class="bg-white rounded-3xl shadow-lg p-6">
-        <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div class="flex items-center gap-3 sm:gap-4">
-            <div
-              class="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 text-2xl sm:text-4xl font-bold text-white shadow-lg shrink-0">
-              {{ authStore.displayInitial }}</div>
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <h1 class="text-xl sm:text-3xl font-bold text-slate-900 truncate">{{ authStore.displayName }}</h1>
-                <span v-if="authStore.isPremium"
-                  class="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-black rounded-lg">👑 Premium</span>
-                <span v-if="authStore.isTeacher"
-                  class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-black rounded-lg">👨‍🏫 Teacher</span>
-              </div>
-              <p class="mt-1 text-sm text-slate-600 truncate">{{ authStore.user?.email }}</p>
+    <div class="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900
+                text-slate-900 dark:text-white px-4 pt-6 pb-28 transition-colors duration-300">
+        <div class="max-w-lg mx-auto">
+
+            <!-- Profile Header -->
+            <div class="text-center mb-10 mt-4">
+                <div class="relative inline-flex justify-center mb-4 w-full">
+                    <AvatarFrame :src="authStore.avatarUrl" :initial="authStore.displayName ? authStore.displayName[0].toUpperCase() : 'U'"
+                        :frame="authStore.avatarFrame" :size="96" class="shadow-xl shadow-orange-500/25" />
+                    <input ref="avatarInputRef" type="file" accept="image/*" class="hidden" @change="onAvatarSelected" />
+                    <button @click="avatarInputRef?.click()" :disabled="uploadingAvatar"
+                        class="absolute bottom-0 right-1/2 -mr-10 w-8 h-8 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-white/10 shadow-md flex items-center justify-center text-slate-500 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition disabled:opacity-50 z-20">
+                        <Loader v-if="uploadingAvatar" :size="14" class="animate-spin" />
+                        <Camera v-else :size="14" />
+                    </button>
+                </div>
+                <p v-if="avatarError" class="text-xs text-red-500 -mt-2 mb-2">{{ avatarError }}</p>
+
+                <!-- Inline name editing -->
+                <div v-if="editingName" class="flex items-center justify-center gap-2 mb-1">
+                    <input v-model="editNameValue" ref="nameInputRef" @keyup.enter="saveNameEdit"
+                        @keyup.escape="cancelNameEdit" placeholder="Ismingizni kiriting"
+                        class="px-3 py-1.5 rounded-xl border-2 border-orange-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-black text-center focus:outline-none focus:border-orange-500 transition w-48" />
+                    <button @click="saveNameEdit"
+                        class="w-8 h-8 rounded-lg bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition">
+                        <Check :size="16" />
+                    </button>
+                    <button @click="cancelNameEdit"
+                        class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-white/70 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+                        <X :size="16" />
+                    </button>
+                </div>
+                <h2 v-else class="text-xl font-black">{{ authStore.displayName || 'Foydalanuvchi' }}</h2>
+
+                <p class="text-sm text-slate-500 dark:text-white/60">{{ authStore.user?.email }}</p>
+                <div v-if="isPremium"
+                    class="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                    <Crown :size="12" /> Premium
+                </div>
             </div>
-          </div>
-          <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-            <RouterLink v-if="authStore.isTeacher" to="/teacher"
-              class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition">
-              👨‍🏫 Teacher Panel</RouterLink>
 
-            <RouterLink v-if="!authStore.isPremium" to="/premium"
-              class="flex-1 sm:flex-none justify-center flex items-center gap-1 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold text-sm shadow hover:opacity-90 transition">
-              👑 Premium</RouterLink>
-            <button @click="handleLogout"
-              class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-xl border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition">Chiqish
-              ↪</button>
-          </div>
-        </div>
-      </section>
-      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-        <div class="flex flex-wrap items-center gap-2">
-          <button @click="openEdit"
-            class="self-start px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition">Edit
-            profile</button>
-          <RouterLink to="/feedback" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm
-         bg-indigo-50 text-indigo-600 border border-indigo-100
-         dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-400/20
-         transition-all duration-200
-         hover:bg-indigo-100 hover:-translate-y-0.5
-         dark:hover:bg-indigo-500/25
-         active:scale-95">
-            💬 Fikr bildirish
-          </RouterLink>
-        </div>
-        <ThemeToggle></ThemeToggle>
-      </div>
-      <!-- Usage stats -->
-      <section class="grid gap-4 md:grid-cols-3">
-        <div class="bg-white rounded-3xl shadow p-5">
-          <span class="text-sm text-slate-500">AI So'rovlar</span>
-          <div class="mt-4 text-3xl font-bold" :class="authStore.isPremium ? 'text-green-600' : 'text-orange-500'">
-            {{ authStore.isPremium ? '∞' : `${authStore.aiUsageCount}/10` }}</div>
-          <p class="mt-2 text-xs text-slate-500">
-            {{ authStore.isPremium ? 'Cheksiz' : `${10 - authStore.aiUsageCount} ta qoldi` }}</p>
-        </div>
-        <div class="bg-white rounded-3xl shadow p-5">
-          <span class="text-sm text-slate-500">Co-op testlar</span>
-          <div class="mt-4 text-3xl font-bold" :class="authStore.isPremium ? 'text-green-600' : 'text-indigo-500'">
-            {{ authStore.isPremium ? '10' : `${authStore.coopUsageCount}/2` }}</div>
-          <p class="mt-2 text-xs text-slate-500">
-            {{ authStore.isPremium ? 'Premium' : `${2 - authStore.coopUsageCount} ta qoldi` }}</p>
-        </div>
-        <div class="bg-white rounded-3xl shadow p-5">
-          <span class="text-sm text-slate-500">Obuna</span>
-          <div class="mt-4 text-3xl font-bold" :class="authStore.isPremium ? 'text-amber-500' : 'text-slate-400'">
-            {{ authStore.isPremium ? '👑' : '🔓' }}</div>
-          <p class="mt-2 text-xs text-slate-500">{{ authStore.isPremium ? 'Premium faol' : 'Standart' }}</p>
-        </div>
-      </section>
+            <!-- Quiz Summary -->
+            <div
+                class="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-5 mb-4 shadow-sm dark:shadow-none">
+                <h3 class="font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <BarChart3 :size="18" class="text-orange-500" /> Test natijalari
+                </h3>
+                <div class="flex justify-around text-center">
+                    <div>
+                        <p class="text-2xl font-black text-slate-900 dark:text-white">{{ stats.total }}</p>
+                        <p class="text-xs text-slate-500 dark:text-white/60">Jami testlar</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-black text-green-600 dark:text-green-400">{{ stats.best }}%</p>
+                        <p class="text-xs text-slate-500 dark:text-white/60">Eng yaxshi</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-black text-orange-500">{{ stats.avg }}%</p>
+                        <p class="text-xs text-slate-500 dark:text-white/60">O'rtacha</p>
+                    </div>
+                </div>
+            </div>
 
-      <section class="grid gap-4 sm:grid-cols-2">
-        <RouterLink to="/chat"
-          class="bg-white rounded-3xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
-          <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-2xl">💬</div>
-          <div>
-            <p class="font-bold text-slate-900 group-hover:text-indigo-600 transition">Do'stlar Chat</p>
-            <p class="text-xs text-slate-500">Do'stlar bilan muloqot</p>
-          </div>
-        </RouterLink>
-        <RouterLink to="/translate"
-          class="bg-white rounded-3xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
-          <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-2xl">🌐</div>
-          <div>
-            <p class="font-bold text-slate-900 group-hover:text-green-600 transition">Tarjimon</p>
-            <p class="text-xs text-slate-500">AI tarjima xizmati</p>
-          </div>
-        </RouterLink>
-        <RouterLink to="/history"
-          class="bg-white rounded-3xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
-          <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-2xl">📊</div>
-          <div>
-            <p class="font-bold text-slate-900 group-hover:text-orange-600 transition">Tarix</p>
-            <p class="text-xs text-slate-500">Testlar va tarjimalar</p>
-          </div>
-        </RouterLink>
-        <RouterLink to="/game"
-          class="bg-white rounded-3xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
-          <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-2xl">🃏</div>
-          <div>
-            <p class="font-bold text-slate-900 group-hover:text-purple-600 transition">O'yin</p>
-            <p class="text-xs text-slate-500">Karta o'yini</p>
-          </div>
-        </RouterLink>
-      </section>
+            <!-- Profil ramkalari (olmosga sotib olinadi) -->
+            <div
+                class="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-5 mb-4 shadow-sm dark:shadow-none">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <Sparkles :size="18" class="text-purple-500" /> Profil ramkalari
+                    </h3>
+                    <span class="flex items-center gap-1 text-cyan-500 font-black text-xs">
+                        <Gem :size="14" /> {{ coinStore.diamonds }}
+                    </span>
+                </div>
+                <div class="grid grid-cols-4 gap-4">
+                    <button v-for="f in FRAME_CATALOG" :key="f.key" @click="selectFrame(f.key)"
+                        class="flex flex-col items-center gap-1.5 group">
+                        <AvatarFrame :src="authStore.avatarUrl" :initial="authStore.displayName ? authStore.displayName[0].toUpperCase() : 'U'"
+                            :frame="f.key" :size="48"
+                            :class="authStore.avatarFrame === f.key ? 'ring-2 ring-offset-2 ring-orange-400 dark:ring-offset-slate-800 rounded-full' : 'opacity-75 group-hover:opacity-100 transition'" />
+                        <span class="text-[9px] font-bold text-slate-400 text-center leading-tight">{{ f.label }}</span>
+                        <span v-if="authStore.avatarFrame === f.key" class="text-[10px] font-black text-green-500">Faol</span>
+                        <span v-else-if="f.cost === 0 || authStore.ownedFrames.includes(f.key)"
+                            class="text-[10px] font-black text-slate-400">{{ f.cost === 0 ? 'Bepul' : 'Sizniki' }}</span>
+                        <span v-else class="text-[10px] font-black text-cyan-500 flex items-center gap-0.5">
+                            <Gem :size="10" /> {{ f.cost }}
+                        </span>
+                    </button>
+                </div>
+                <p v-if="frameError" class="text-xs text-red-500 mt-3">{{ frameError }}</p>
+            </div>
+
+            <!-- Settings Items -->
+            <div class="space-y-2 mb-6">
+                <button @click="startNameEdit" class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10
+                 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left">
+                    <span class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+                        <User :size="18" class="text-slate-400" /> Profilni tahrirlash
+                    </span>
+                    <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
+                </button>
+                <button @click="toggleDarkMode" class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10
+                 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left">
+                    <span class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+                        <Moon v-if="!isDark" :size="18" class="text-slate-400" />
+                        <Sun v-else :size="18" class="text-amber-400" />
+                        {{ isDark ? 'Yorug\' rejim' : 'Tungi rejim' }}
+                    </span>
+                    <span class="text-slate-300">
+                        <Sun v-if="!isDark" :size="16" class="text-slate-400" />
+                        <Moon v-else :size="16" class="text-indigo-500" />
+                    </span>
+                </button>
+                <RouterLink to="/premium"
+                    class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10
+               rounded-2xl border border-amber-200 dark:border-amber-500/20 hover:shadow-md transition text-left block">
+                    <span class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+                        <Crown :size="18" class="text-amber-500" /> Premium
+                    </span>
+                    <span class="text-amber-500 font-bold text-xs flex items-center gap-1">
+                        <Crown :size="14" />
+                    </span>
+                </RouterLink>
+
+                <!-- Ilova haqida -->
+                <button @click="showAboutModal = true" class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10
+                 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left">
+                    <span class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+                        <Info :size="18" class="text-slate-400" /> Ilova haqida
+                    </span>
+                    <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
+                </button>
+            </div>
+
+            <!-- Sign Out -->
+            <button @click="handleSignOut" class="w-full py-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 font-bold text-sm
+               hover:bg-red-100 dark:hover:bg-red-500/20 transition flex items-center justify-center gap-2">
+                <LogOut :size="18" /> Chiqish
+            </button>
+        </div>
+
+        <!-- About Modal -->
+        <div v-if="showAboutModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+            @click.self="showAboutModal = false">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border-2 border-slate-200 dark:border-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <Info :size="22" class="text-orange-500" /> Ilova haqida
+                    </h2>
+                    <button @click="showAboutModal = false"
+                        class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-white/60 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                        <X :size="16" />
+                    </button>
+                </div>
+                <div class="space-y-4 text-sm">
+                    <div
+                        class="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/10">
+                        <p class="text-xs text-slate-400 dark:text-white/50 uppercase font-bold tracking-wide">Ilova
+                            nomi</p>
+                        <p class="font-black text-slate-900 dark:text-white text-lg mt-0.5">Socrati</p>
+                    </div>
+                    <div
+                        class="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/10">
+                        <p class="text-xs text-slate-400 dark:text-white/50 uppercase font-bold tracking-wide">Versiya
+                        </p>
+                        <p class="font-black text-slate-900 dark:text-white text-lg mt-0.5">2.0.0</p>
+                    </div>
+                    <div
+                        class="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/10">
+                        <p class="text-xs text-slate-400 dark:text-white/50 uppercase font-bold tracking-wide">Tavsif
+                        </p>
+                        <p class="text-slate-700 dark:text-white/80 mt-1 leading-relaxed">This app helps students with
+                            homework, quizzes, and games</p>
+                    </div>
+                    <div
+                        class="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/10">
+                        <p class="text-xs text-slate-400 dark:text-white/50 uppercase font-bold tracking-wide">Dasturchi
+                        </p>
+                        <p class="font-bold text-slate-900 dark:text-white mt-0.5">Abduhafiz Qodirov</p>
+                        <p class="text-xs text-slate-500 dark:text-white/60 mt-0.5">Qo'qon, O'zbekiston</p>
+                        <p class="text-xs text-slate-500 dark:text-white/60">Full-stack dasturchi & AI muhandisi</p>
+                    </div>
+                    <a href="mailto:abduhafiznazarov@gmail.com"
+                        class="block w-full py-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 rounded-2xl text-orange-600 dark:text-orange-400 font-bold text-sm text-center hover:bg-orange-100 dark:hover:bg-orange-500/20 transition flex items-center justify-center gap-2">
+                        <Mail :size="16" /> qodirovabduhafiz1@gmail.com
+                    </a>
+                </div>
+                <button @click="showAboutModal = false"
+                    class="w-full mt-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                    Yopish
+                </button>
+            </div>
+        </div>
+
+        <!-- Onboarding Tooltip -->
+        <OnboardingTooltip pageId="User" title="Profil" description="Shaxsiy profil va sozlamalar" />
     </div>
-
-    <div v-if="editing"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 overflow-y-auto">
-      <div class="w-full max-w-md rounded-3xl bg-white p-5 sm:p-6 shadow-2xl my-auto">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-black text-slate-900">Profilni tahrirlash</h2>
-          <button @click="editing = false" class="h-9 w-9 rounded-xl bg-slate-100 text-slate-600">x</button>
-        </div>
-        <div class="mt-5 space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-semibold text-slate-700">Ism familiya</label>
-            <input v-model="editName"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-orange-400" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm font-semibold text-slate-700">Avatar URL</label>
-            <input v-model="editAvatar"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-orange-400" />
-          </div>
-          <p v-if="authStore.error" class="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-500">{{ authStore.error }}
-          </p>
-          <button @click="saveEdit" :disabled="authStore.loading"
-            class="w-full rounded-2xl bg-orange-500 py-3 font-black text-white disabled:opacity-60">
-            {{ authStore.loading ? 'Saqlanmoqda...' : 'Saqlash' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
+
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { User, BarChart3, LogOut, Moon, Sun, Crown, Info, Mail, Check, X, ChevronRight, Camera, Loader, Sparkles, Gem } from '@lucide/vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/AuthStore';
-import ThemeToggle from "../components/ThemeToggle.vue"
+import { useCoinStore } from '../stores/CoinStore';
+import supabase from '../supabase';
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
+import AvatarFrame from '../components/AvatarFrame.vue';
+import { FRAME_CATALOG, frameCost } from '../lib/frames';
+
 const router = useRouter();
 const authStore = useAuthStore();
-const editing = ref(false);
-const editName = ref('');
-const editAvatar = ref('');
+const coinStore = useCoinStore();
+// Bug fix: this used to be hardcoded to `ref(true)`, so every user — even
+// non-premium ones — saw the Premium badge and never the upsell button.
+// Now it reflects the real auth state.
+const isPremium = computed(() => authStore.isPremium);
+const stats = ref({ total: 0, best: 0, avg: 0 });
+const isDark = ref(document.documentElement.classList.contains('dark'));
+const showAboutModal = ref(false);
 
-const openEdit = () => {
-  editName.value = authStore.displayName;
-  editAvatar.value = authStore.user?.user_metadata?.avatar_url || '';
-  editing.value = true;
+// Inline name editing
+const editingName = ref(false);
+const editNameValue = ref('');
+const nameInputRef = ref<HTMLInputElement | null>(null);
+
+// Avatar upload
+const avatarInputRef = ref<HTMLInputElement | null>(null);
+const uploadingAvatar = ref(false);
+const avatarError = ref('');
+
+const onAvatarSelected = async (e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    avatarError.value = '';
+
+    if (!file.type.startsWith('image/')) {
+        avatarError.value = 'Faqat rasm fayl tanlang.';
+        return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+        avatarError.value = 'Rasm hajmi 3MB dan oshmasligi kerak.';
+        return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    uploadingAvatar.value = true;
+    try {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `${user.id}/avatar.${ext}`;
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(path, file, { upsert: true, cacheControl: '3600' });
+
+        if (uploadError) {
+            avatarError.value = "Yuklashda xatolik. Supabase'da 'avatars' bucket sozlanganini tekshiring.";
+            return;
+        }
+
+        const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(path);
+        // Cache-bust so the new photo shows immediately even though the path is unchanged
+        const bustedUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
+        await authStore.updateProfile(authStore.displayName, bustedUrl);
+    } finally {
+        uploadingAvatar.value = false;
+        if (avatarInputRef.value) avatarInputRef.value.value = '';
+    }
 };
-const saveEdit = async () => {
-  const ok = await authStore.updateProfile(editName.value, editAvatar.value);
-  if (ok) editing.value = false;
+
+onMounted(() => {
+    loadStats();
+    coinStore.fetchCoins();
+});
+
+// Profil ramkalari — bir marta olmosga sotib olinadi, keyin bepul kiyiladi
+const frameError = ref('');
+
+const selectFrame = async (key: string) => {
+    frameError.value = '';
+    if (authStore.avatarFrame === key) return;
+
+    const alreadyOwned = authStore.ownedFrames.includes(key);
+    const cost = frameCost(key);
+
+    // Egalik qilingan (yoki bepul) ramkani kiyish — olmos yechilmaydi
+    if (alreadyOwned || cost === 0) {
+        const res = await authStore.setAvatarFrame(key);
+        if (!res.ok) frameError.value = res.error ? `Xatolik: ${res.error}` : 'Ramkani saqlashda xatolik yuz berdi.';
+        return;
+    }
+
+    // Yangi ramka — sotib olish kerak
+    if (coinStore.diamonds < cost) {
+        frameError.value = `Bu ramka uchun ${cost} olmos kerak.`;
+        return;
+    }
+
+    const res = await authStore.unlockFrame(key);
+    if (!res.ok) {
+        frameError.value = res.error ? `Xatolik: ${res.error}` : 'Ramkani saqlashda xatolik yuz berdi.';
+        return;
+    }
+
+    const newDiamonds = coinStore.diamonds - cost;
+    coinStore.diamonds = newDiamonds;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        await supabase.from('coins').update({ diamonds: newDiamonds }).eq('user_id', user.id);
+    }
 };
-const handleLogout = async () => { await authStore.signOut(); router.push('/login'); };
+
+const loadStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+        .from('test_results')
+        .select('percent')
+        .eq('user_id', user.id);
+    if (data && data.length > 0) {
+        stats.value.total = data.length;
+        stats.value.best = Math.max(...data.map((d: any) => d.percent));
+        stats.value.avg = Math.round(data.reduce((s: number, d: any) => s + d.percent, 0) / data.length);
+    }
+};
+
+const toggleDarkMode = () => {
+    document.documentElement.classList.toggle('dark');
+    isDark.value = document.documentElement.classList.contains('dark');
+    localStorage.setItem('darkMode', isDark.value ? 'true' : 'false');
+};
+
+const handleSignOut = async () => {
+    await authStore.signOut();
+    router.push('/login');
+};
+
+// Name editing
+const startNameEdit = () => {
+    editNameValue.value = authStore.displayName || '';
+    editingName.value = true;
+    nextTick(() => {
+        nameInputRef.value?.focus();
+        nameInputRef.value?.select();
+    });
+};
+
+const saveNameEdit = async () => {
+    const name = editNameValue.value.trim();
+    if (!name || name.length < 2) return;
+    await authStore.updateProfile(name);
+    editingName.value = false;
+};
+
+const cancelNameEdit = () => {
+    editingName.value = false;
+    editNameValue.value = '';
+};
 </script>

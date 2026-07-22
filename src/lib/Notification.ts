@@ -1,10 +1,13 @@
 import supabase from "../supabase";
 
+// `icon` — @lucide/vue component name (string), rendered dynamically in
+// Notifications.vue. Keep this a plain icon name, never an emoji, so every
+// notification renders consistently regardless of who triggered it.
 export const saveNotification = async (
   userId: string,
   title: string,
   text: string,
-  icon = "🔔",
+  icon = "Bell",
   badge = "",
   iconBg = "bg-slate-50",
   iconColor = "text-slate-500",

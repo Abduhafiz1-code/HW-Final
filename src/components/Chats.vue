@@ -1,15 +1,9 @@
 <script setup lang="ts">
-// import { MessagesSquare } from "@lucide/vue";
+import { MessageCircle } from '@lucide/vue';
 </script>
 
 <template>
-    <div>
-        <RouterLink to="/chat">
-
-            💬
-
-        </RouterLink>
-    </div>
+    <RouterLink to="/chat" class="flex items-center justify-center">
+        <MessageCircle :size="24" />
+    </RouterLink>
 </template>
-
-<style lang="scss" scoped></style>

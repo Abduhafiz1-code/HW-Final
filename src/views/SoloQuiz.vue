@@ -3,10 +3,10 @@
     <div class="max-w-lg mx-auto">
       <div class="flex items-center gap-3 mb-6">
         <RouterLink to="/"
-          class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
-          ←</RouterLink>
+          class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 transition">
+          <ArrowLeft :size="18" /></RouterLink>
         <div>
-          <h1 class="text-xl font-black text-slate-900">🧠 Yolg'iz Quiz</h1>
+          <h1 class="text-xl font-black text-slate-900"><Brain :size="20" class="inline mr-1" /> Yolg'iz Quiz</h1>
           <p class="text-xs text-slate-500">AI bilan o'z testingni yech</p>
         </div>
       </div>
@@ -20,7 +20,7 @@
               ? 'border-orange-400 bg-orange-50'
               : 'border-slate-200'
               " class="p-3 rounded-2xl border-2 text-left transition hover:border-orange-300">
-              <span class="text-xl">{{ s.icon }}</span>
+              <component :is="subjectIconMap[s.id]" :size="24" class="mb-1" />
               <p class="text-sm font-bold text-slate-900 mt-1">{{ s.name }}</p>
             </button>
           </div>
@@ -49,7 +49,8 @@
         </div>
         <button @click="startQuiz" :disabled="loading"
           class="w-full py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition disabled:opacity-60 active:scale-95">
-          {{ loading ? "⏳ Tayyorlanmoqda..." : "🚀 Boshlash" }}
+          <template v-if="loading"><Loader :size="16" class="inline animate-spin" /> Tayyorlanmoqda...</template>
+          <template v-else><Rocket :size="16" class="inline mr-1" /> Boshlash</template>
         </button>
       </div>
 
@@ -62,13 +63,13 @@
             }"></div>
           </div>
           <span class="text-sm font-bold text-slate-600">{{ currentIdx }}/{{ session.length }}</span>
-          <span class="text-sm font-bold text-green-600">✓ {{ score }}</span>
+          <span class="text-sm font-bold text-green-600 flex items-center gap-1"><Check :size="14" /> {{ score }}</span>
         </div>
 
         <!-- Finished -->
         <div v-if="currentIdx >= session.length"
           class="bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-sm">
-          <div class="text-6xl mb-4">{{ percent >= 70 ? "🌟" : "💪" }}</div>
+          <div class="text-6xl mb-4"><Star v-if="percent >= 70" :size="60" class="text-yellow-500" /><ThumbsUp v-else :size="60" class="text-orange-500" /></div>
           <h2 class="text-2xl font-black text-slate-900">Yakunlandi!</h2>
           <p class="text-slate-500 mt-1">
             {{ score }}/{{ session.length }} to'g'ri
@@ -77,10 +78,10 @@
             {{ percent }}%
           </p>
           <div v-if="saving" class="mt-3 text-xs text-slate-400">
-            ⏳ Saqlanmoqda...
+            <Loader :size="12" class="inline animate-spin mr-1" /> Saqlanmoqda...
           </div>
           <div v-else class="mt-3 text-xs text-green-500">
-            ✅ Natija saqlandi!
+            <CheckCircle :size="12" class="inline mr-1" /> Natija saqlandi!
           </div>
           <div class="flex gap-3 mt-6">
             <button @click="session = null" class="flex-1 py-3 bg-orange-500 text-white font-bold rounded-2xl">
@@ -115,43 +116,51 @@
           <div v-if="selected" class="mt-4">
             <p class="text-sm font-bold" :class="selected === current.answer ? 'text-green-600' : 'text-red-500'
               ">
-              {{
-                selected === current.answer
-                  ? "✅ To'g'ri!"
-                  : `❌ To'g'ri: ${current.answer}`
-              }}
+              <template v-if="selected === current.answer"><CheckCircle :size="16" class="inline text-green-600 mr-1" /> To'g'ri!</template>
+              <template v-else><XCircle :size="16" class="inline text-red-500 mr-1" /> To'g'ri: {{ current.answer }}</template>
             </p>
             <p v-if="current.explanation" class="text-xs text-slate-500 mt-1">
               {{ current.explanation }}
             </p>
             <button @click="nextQ"
               class="mt-3 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition">
-              {{
-                currentIdx + 1 >= session.length ? "🏁 Yakunla" : "Keyingi →"
-              }}
+              <template v-if="currentIdx + 1 >= session.length"><Flag :size="16" class="inline mr-1" /> Yakunla</template>
+              <template v-else>Keyingi <ArrowRight :size="15" class="inline-block" /></template>
             </button>
           </div>
         </div>
       </div>
     </div>
+    <OnboardingTooltip pageId="SoloQuiz" title="Yolg'iz Test" description="Mustaqil test yeching va natijangizni ko'ring" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { Brain, Hash, FlaskConical, ScrollText, Globe, Loader, Rocket, Star, ThumbsUp, Flag, CheckCircle, XCircle, ArrowLeft, ArrowRight } from '@lucide/vue';
 import supabase from "../supabase";
 import { useCoinStore } from "../stores/CoinStore";
 import { askAIJson } from "../lib/ai";
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
 
 const coinStore = useCoinStore();
 
+const subjectIconMap: Record<string, any> = {
+  math: Hash,
+  english: Globe,
+  science: FlaskConical,
+  history: ScrollText,
+  geography: Globe,
+  uzbek: Globe,
+};
+
 const subjects = [
-  { id: "math", icon: "🔢", name: "Matematika" },
-  { id: "english", icon: "🇬🇧", name: "Ingliz tili" },
-  { id: "science", icon: "🔬", name: "Fanlar" },
-  { id: "history", icon: "📜", name: "Tarix" },
-  { id: "geography", icon: "🌍", name: "Geografiya" },
-  { id: "uzbek", icon: "🇺🇿", name: "O'zbek tili" },
+  { id: "math", name: "Matematika" },
+  { id: "english", name: "Ingliz tili" },
+  { id: "science", name: "Fanlar" },
+  { id: "history", name: "Tarix" },
+  { id: "geography", name: "Geografiya" },
+  { id: "uzbek", name: "O'zbek tili" },
 ];
 const levels = ["A1", "A2", "B1", "B2", "C1"];
 

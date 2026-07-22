@@ -2,7 +2,7 @@
   <div ref="dropdownRef" class="relative inline-block font-sans">
     <button @click.stop="isOpen = !isOpen"
       class="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm hover:bg-gray-50 transition-all border border-gray-200 hover:border-orange-200 active:scale-95">
-      <span class="text-xl">🔥</span>
+      <Flame :size="20" class="text-orange-500" />
       <span class="text-orange-500 font-black text-base">{{ streakCount }}</span>
     </button>
     <transition name="pop">
@@ -12,7 +12,7 @@
         <div class="flex items-center gap-4 mb-6">
           <div :class="streakCount > 0 ? 'bg-orange-50' : 'bg-gray-100'"
             class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0">
-            <span class="text-3xl">🔥</span>
+            <Flame :size="28" :class="streakCount > 0 ? 'text-orange-500' : 'text-slate-400'" />
           </div>
           <div>
             <h2 class="text-xl font-black text-gray-800">{{ streakCount }}-kunlik streak!</h2>
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { Flame } from '@lucide/vue';
 import supabase from '../supabase';
 
 const isOpen = ref(false);

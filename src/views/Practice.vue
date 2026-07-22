@@ -3,10 +3,10 @@
     <div class="max-w-2xl mx-auto">
       <div class="flex items-center gap-3 mb-6">
         <RouterLink to="/"
-          class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
-          ←</RouterLink>
+          class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 transition">
+          <ArrowLeft :size="18" /></RouterLink>
         <div>
-          <h1 class="text-xl font-black text-slate-900">📝 Mashq</h1>
+          <h1 class="text-xl font-black text-slate-900"><FileText :size="20" class="inline mr-1" /> Mashq</h1>
           <p class="text-xs text-slate-500">AI bilan kunlik mashqlar</p>
         </div>
       </div>
@@ -19,7 +19,7 @@
             <button v-for="t in topics" :key="t.id" @click="selectedTopic = t.id"
               :class="selectedTopic === t.id ? 'border-orange-400 bg-orange-50' : 'border-slate-200 bg-slate-50'"
               class="p-4 rounded-2xl border-2 text-left transition hover:border-orange-300">
-              <div class="text-2xl mb-1">{{ t.icon }}</div>
+              <div class="text-2xl mb-1"><component :is="topicIconMap[t.id]" :size="24" /></div>
               <p class="font-bold text-sm text-slate-900">{{ t.name }}</p>
               <p class="text-xs text-slate-500 mt-0.5">{{ t.desc }}</p>
             </button>
@@ -39,7 +39,8 @@
           </div>
           <button @click="startPractice" :disabled="loading"
             class="w-full mt-4 py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition disabled:opacity-60 active:scale-95">
-            {{ loading ? '⏳ Tayyorlanmoqda...' : '🚀 Mashqni boshlash' }}
+            <template v-if="loading"><Loader :size="16" class="inline animate-spin" /> Tayyorlanmoqda...</template>
+            <template v-else><Rocket :size="16" class="inline" /> Mashqni boshlash</template>
           </button>
         </div>
       </div>
@@ -53,13 +54,13 @@
               :style="{ width: `${(currentIdx / session.length) * 100}%` }"></div>
           </div>
           <span class="text-sm font-bold text-slate-600">{{ currentIdx }}/{{ session.length }}</span>
-          <span class="text-sm font-bold text-green-600">✓ {{ score }}</span>
+          <span class="text-sm font-bold text-green-600 flex items-center gap-1"><Check :size="14" /> {{ score }}</span>
         </div>
 
         <!-- Done -->
         <div v-if="currentIdx >= session.length"
           class="bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-sm">
-          <div class="text-6xl mb-4">{{ score >= session.length * 0.7 ? '🌟' : '💪' }}</div>
+          <div class="text-6xl mb-4"><Star v-if="score >= session.length * 0.7" :size="60" class="text-yellow-500" /><ThumbsUp v-else :size="60" class="text-orange-500" /></div>
           <h2 class="text-2xl font-black text-slate-900">Mashq yakunlandi!</h2>
           <p class="text-slate-500 mt-2">{{ score }}/{{ session.length }} to'g'ri javob</p>
           <div class="w-full bg-slate-100 rounded-full h-4 mt-4">
@@ -91,34 +92,48 @@
           </div>
           <div v-if="selected" class="mt-4">
             <p class="text-sm font-semibold" :class="selected === current.answer ? 'text-green-600' : 'text-red-500'">
-              {{ selected === current.answer ? '✅ Barakalla! To\'g\'ri!' : `❌ Noto\'g\'ri. To\'g\'ri javob: ${current.answer}` }}
+              <template v-if="selected === current.answer"><CheckCircle :size="16" class="inline text-green-600 mr-1" /> Barakalla! To'g'ri!</template>
+              <template v-else><XCircle :size="16" class="inline text-red-500 mr-1" /> Noto'g'ri. To'g'ri javob: {{ current.answer }}</template>
             </p>
             <p v-if="current.explanation" class="text-xs text-slate-500 mt-1">{{ current.explanation }}</p>
             <button @click="nextQuestion"
               class="mt-3 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition">
-              {{ currentIdx + 1 >= session.length ? '🏁 Yakunla' : 'Keyingi →' }}
+              <template v-if="currentIdx + 1 >= session.length"><Flag :size="16" class="inline mr-1" /> Yakunla</template>
+              <template v-else>Keyingi <ArrowRight :size="15" class="inline-block" /></template>
             </button>
           </div>
         </div>
       </div>
     </div>
+    <OnboardingTooltip pageId="Practice" title="Mashqlar" description="AI yordamida fan bo'yicha mashqlar yeching" />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { FileText, Hash, FlaskConical, ScrollText, Globe, Loader, Rocket, Star, ThumbsUp, Flag, CheckCircle, XCircle, ArrowLeft, ArrowRight } from '@lucide/vue';
 import supabase from '../supabase';
 import { askAIJson } from '../lib/ai';
 import { useCoinStore } from '../stores/CoinStore';
 import { saveNotification } from '../lib/Notification';
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
 const coinStore = useCoinStore();
 
+const topicIconMap: Record<string, any> = {
+  math: Hash,
+  english: Globe,
+  science: FlaskConical,
+  history: ScrollText,
+  geography: Globe,
+  uzbek: Globe,
+};
+
 const topics = [
-  { id: 'math', icon: '🔢', name: 'Matematika', desc: 'Algebra, geometriya' },
-  { id: 'english', icon: '🇬🇧', name: 'Ingliz tili', desc: 'Grammar, vocabulary' },
-  { id: 'science', icon: '🔬', name: 'Fan', desc: 'Fizika, kimyo, biologiya' },
-  { id: 'history', icon: '📜', name: 'Tarix', desc: "O'zbekiston va dunyo tarixi" },
-  { id: 'geography', icon: '🌍', name: 'Geografiya', desc: 'Mamlakatlar, kapitallar' },
-  { id: 'uzbek', icon: '🇺🇿', name: "O'zbek tili", desc: 'Grammatika, imlo' },
+  { id: 'math', name: 'Matematika', desc: 'Algebra, geometriya' },
+  { id: 'english', name: 'Ingliz tili', desc: 'Grammar, vocabulary' },
+  { id: 'science', name: 'Fan', desc: 'Fizika, kimyo, biologiya' },
+  { id: 'history', name: 'Tarix', desc: "O'zbekiston va dunyo tarixi" },
+  { id: 'geography', name: 'Geografiya', desc: 'Mamlakatlar, kapitallar' },
+  { id: 'uzbek', name: "O'zbek tili", desc: 'Grammatika, imlo' },
 ];
 
 interface Question { question: string; options: string[]; answer: string; explanation?: string; }
@@ -183,9 +198,9 @@ const savePractice = async () => {
   // savePractice ichida, supabase.from insert dan keyin:
   await saveNotification(
     user.id,
-    'Mashq yakunlandi! 📝',
+    'Mashq yakunlandi!',
     `${activeTopic.value} — ${percent}% natija`,
-    '📝', `+${percent}%`, 'bg-green-50', 'text-green-500', 'bg-green-50 text-green-600'
+    'FileText', `+${percent}%`, 'bg-green-50', 'text-green-500', 'bg-green-50 text-green-600'
   );
 };
 

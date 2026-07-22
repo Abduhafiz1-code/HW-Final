@@ -6,7 +6,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div class="min-w-0">
           <h1 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">
-            👨‍🏫 O'qituvchi Panel
+            <GraduationCap :size="24" class="inline -mt-1 mr-1" /> O'qituvchi Panel
           </h1>
           <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ authStore.displayName }}</p>
         </div>
@@ -35,22 +35,25 @@
         </div>
       </div>
 
-      <!-- Tabs: torroq ekranlarda gorizontal scroll bo'ladi, matn siqilib ketmaydi -->
+      <!-- Tabs -->
       <div
-        class="flex  overflow-x-auto no-scrollbar rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 mb-5 shadow-sm gap-3">
+        class="flex overflow-x-auto no-scrollbar rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 mb-5 shadow-sm gap-3">
         <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
           :class="activeTab === t.id ? 'bg-orange-500 text-white shadow' : 'text-slate-600 dark:text-slate-400'"
           class="flex-shrink-0 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition whitespace-nowrap">
+          <component :is="t.icon" :size="14" class="inline -mt-0.5" />
           {{ t.label }}
         </button>
       </div>
 
       <!-- TESTS tab -->
       <div v-if="activeTab === 'tests'" class="space-y-3">
-        <div v-if="loading" class="text-center py-10 text-slate-400">⏳ Yuklanmoqda...</div>
+        <div v-if="loading" class="text-center py-10 text-slate-400">
+          <Loader :size="20" class="inline animate-spin -mt-0.5 mr-1" /> Yuklanmoqda...
+        </div>
         <div v-else-if="tests.length === 0"
           class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 px-4">
-          <div class="text-5xl mb-3">📋</div>
+          <div class="mb-3"><ClipboardList :size="48" class="mx-auto text-slate-300 dark:text-slate-600" /></div>
           <p class="text-slate-500 dark:text-slate-400 text-sm">Hali test yaratmadingiz</p>
           <button @click="showCreateTest = true"
             class="mt-4 px-5 py-2.5 bg-orange-500 text-white font-bold rounded-2xl text-sm">
@@ -73,23 +76,22 @@
                 </span>
                 <button @click="copyCode(test.code)"
                   class="text-xs text-indigo-500 font-semibold hover:text-indigo-700 transition whitespace-nowrap">
-                  📋 Nusxa
+                  <ClipboardList :size="12" class="inline -mt-0.5" /> Nusxa
                 </button>
               </div>
             </div>
-            <!-- Tugmalar mobilda to'liq kenglikda -->
             <div class="grid grid-cols-3 sm:flex sm:flex-col gap-2 sm:gap-1.5 flex-shrink-0">
               <button @click="openAssign(test)"
                 class="px-2 sm:px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-indigo-100 transition whitespace-nowrap">
-                📤 Yuborish
+                <Send :size="12" class="inline -mt-0.5" /> Yuborish
               </button>
               <button @click="viewResults(test)"
                 class="px-2 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-slate-200 transition whitespace-nowrap">
-                📊 Natija
+                <BarChart3 :size="12" class="inline -mt-0.5" /> Natija
               </button>
               <button @click="deleteTest(test.id)"
                 class="px-2 sm:px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-red-100 transition">
-                🗑
+                <Trash2 :size="12" />
               </button>
             </div>
           </div>
@@ -122,20 +124,20 @@
               </p>
             </div>
             <button @click="deleteGroup(group.id)"
-              class="text-xs text-red-400 hover:text-red-600 p-2 flex-shrink-0">🗑</button>
+              class="text-xs text-red-400 hover:text-red-600 p-2 flex-shrink-0"><Trash2 :size="14" /></button>
           </div>
           <div
             class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2">
             <span v-if="group.telegram_status === 'linked'"
               class="text-xs bg-green-50 dark:bg-green-900/20 text-green-600 font-bold px-3 py-1 rounded-xl">
-              ✅ Telegramga ulangan
+              <CheckCircle :size="12" class="inline -mt-0.5" /> Telegramga ulangan
             </span>
             <span v-else class="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-600 font-bold px-3 py-1 rounded-xl">
-              ⚠️ Ulanmagan
+              <AlertTriangle :size="12" class="inline -mt-0.5" /> Ulanmagan
             </span>
             <button @click="openTelegramLink(group)"
               class="text-xs text-indigo-500 font-bold hover:text-indigo-700 transition">
-              🔗 {{ group.telegram_status === 'linked' ? "Qayta ulash" : "Ulash" }}
+              <Link :size="12" class="inline -mt-0.5" /> {{ group.telegram_status === 'linked' ? "Qayta ulash" : "Ulash" }}
             </button>
           </div>
         </div>
@@ -145,7 +147,7 @@
       <div v-else-if="activeTab === 'results'" class="space-y-3">
         <div v-if="!selectedTest"
           class="text-center py-12 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 px-4">
-          <div class="text-5xl mb-3">📊</div>
+          <div class="mb-3"><BarChart3 :size="48" class="mx-auto text-slate-300 dark:text-slate-600" /></div>
           <p class="text-slate-500 dark:text-slate-400 text-sm">Testlar tabidan test tanlang</p>
         </div>
         <div v-else>
@@ -158,9 +160,9 @@
             <div class="flex items-center gap-2 flex-shrink-0">
               <button @click="openSendResults" :disabled="testResults.length === 0"
                 class="text-xs bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl disabled:opacity-40">
-                📤 Telegramga
+                <Send :size="12" class="inline -mt-0.5" /> Telegramga
               </button>
-              <button @click="selectedTest = null" class="text-xs text-slate-500 p-1">✕</button>
+              <button @click="selectedTest = null" class="text-xs text-slate-500 p-1"><X :size="14" /></button>
             </div>
           </div>
           <div v-if="testResults.length === 0"
@@ -200,7 +202,7 @@
           <h2 class="font-black text-lg text-slate-900 dark:text-white">Test yaratish</h2>
           <button @click="showCreateTest = false"
             class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 flex-shrink-0">
-            ✕
+            <X :size="16" />
           </button>
         </div>
         <div class="p-4 sm:p-5 space-y-4">
@@ -227,7 +229,7 @@
           <!-- AI generate -->
           <div
             class="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-4 border border-orange-100 dark:border-orange-800">
-            <p class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2">🤖 AI bilan savollar yaratish</p>
+            <p class="text-sm font-bold text-orange-700 dark:text-orange-400 mb-2"><Bot :size="16" class="inline -mt-0.5" /> AI bilan savollar yaratish</p>
             <div class="flex flex-col sm:flex-row gap-2 mb-2">
               <input v-model="aiTestTopic" placeholder="Mavzu: Kvadrat tenglamalar..."
                 class="flex-1 min-w-0 px-3 py-2 rounded-xl text-slate-800 dark:text-white border border-orange-200 dark:border-orange-700 bg-white dark:bg-slate-700 text-sm focus:outline-none" />
@@ -240,7 +242,9 @@
             </div>
             <button @click="generateQuestions" :disabled="aiTestLoading || !aiTestTopic"
               class="w-full py-2 bg-orange-500 text-white font-bold rounded-xl text-sm hover:bg-orange-600 transition disabled:opacity-60">
-              {{ aiTestLoading ? "⏳ Yaratilmoqda..." : "🤖 AI dan yaratish" }}
+              <Loader v-if="aiTestLoading" :size="16" class="inline animate-spin -mt-0.5" />
+              <Bot v-else :size="16" class="inline -mt-0.5" />
+              {{ aiTestLoading ? " Yaratilmoqda..." : " AI dan yaratish" }}
             </button>
           </div>
 
@@ -256,15 +260,15 @@
                   {{ i + 1 }}. {{ q.question }}
                 </p>
                 <button @click="newTest.questions.splice(i, 1)"
-                  class="text-red-400 text-xs hover:text-red-600 flex-shrink-0">✕</button>
+                  class="text-red-400 text-xs hover:text-red-600 flex-shrink-0"><X :size="14" /></button>
               </div>
-              <p class="text-xs text-green-600 mt-1">✓ {{ q.answer }}</p>
+              <p class="text-xs text-green-600 mt-1"><CheckCircle :size="12" class="inline -mt-0.5" /> {{ q.answer }}</p>
             </div>
           </div>
 
           <!-- Manual -->
           <div class="border border-slate-200 dark:border-slate-600 rounded-2xl p-4">
-            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">✏️ Qo'lda savol qo'shish</p>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3"><Pencil :size="14" class="inline -mt-0.5" /> Qo'lda savol qo'shish</p>
             <input v-model="manualQ.question" placeholder="Savol matni"
               class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none mb-2" />
             <div class="grid grid-cols-2 gap-2 mb-2">
@@ -288,7 +292,9 @@
           </p>
           <button @click="saveTest" :disabled="!newTest.title || newTest.questions.length === 0 || saving"
             class="w-full py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition disabled:opacity-50 active:scale-95">
-            {{ saving ? "⏳ Saqlanmoqda..." : "💾 Testni saqlash" }}
+            <Loader v-if="saving" :size="18" class="inline animate-spin -mt-0.5" />
+            <Save v-else :size="18" class="inline -mt-0.5" />
+            {{ saving ? " Saqlanmoqda..." : " Testni saqlash" }}
           </button>
         </div>
       </div>
@@ -323,11 +329,15 @@
           </button>
           <button @click="assignTest" :disabled="selectedGroups.length === 0 || assigning"
             class="flex-1 py-2.5 bg-orange-500 text-white font-bold rounded-2xl text-sm disabled:opacity-50">
-            {{ assigning ? '⏳' : '📤 Yuborish' }}
+            <Loader v-if="assigning" :size="16" class="inline animate-spin -mt-0.5" />
+            <Send v-else :size="16" class="inline -mt-0.5" />
+            {{ assigning ? '' : ' Yuborish' }}
           </button>
         </div>
       </div>
-    </div><!-- Telegram link modal -->
+    </div>
+
+    <!-- Telegram link modal -->
     <div v-if="showTelegramModal"
       class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-4">
       <div class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-sm p-6 shadow-2xl">
@@ -342,7 +352,7 @@
             class="text-xl font-black tracking-widest text-orange-500">#{{ linkingGroup?.telegram_link_code }}</span>
         </div>
         <button @click="copyLinkCode" class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-2xl text-sm mb-2">
-          📋 Kodni nusxalash
+          <ClipboardList :size="16" class="inline -mt-0.5" /> Kodni nusxalash
         </button>
         <button @click="showTelegramModal = false"
           class="w-full py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-sm">
@@ -376,26 +386,32 @@
         </button>
       </div>
     </div>
+
     <!-- Toast -->
     <div v-if="copyToast"
       class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-xl z-50 whitespace-nowrap max-w-[90vw] truncate">
-      ✅ Kod nusxalandi!
+      <CheckCircle :size="14" class="inline -mt-0.5" /> Kod nusxalandi!
     </div>
+    <OnboardingTooltip pageId="Teacher" title="O'qituvchi Panel" description="Test yarating, guruhlar boshqaring va natijalarni ko'ring" />
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/AuthStore";
 import supabase from "../supabase";
 import { askAIJson } from "../lib/ai";
+import { GraduationCap, ClipboardList, BarChart3, Users, Ban, Send, Trash2, Link, Loader, CheckCircle, AlertTriangle, Bot, Save, X, Pencil } from '@lucide/vue';
 import TeacherBlockedStudents from '../components/TeacherBlockedStudents.vue';
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
+
 const authStore = useAuthStore();
 const activeTab = ref("tests");
 const tabs = [
-  { id: "tests", label: "📋 Testlar" },
-  { id: "groups", label: "👥 Guruhlar" },
-  { id: "results", label: "📊 Natijalar" },
-  { id: "blocked", label: "🚫 Bloklangan" },
+  { id: "tests", label: "Testlar", icon: ClipboardList },
+  { id: "groups", label: "Guruhlar", icon: Users },
+  { id: "results", label: "Natijalar", icon: BarChart3 },
+  { id: "blocked", label: "Bloklangan", icon: Ban },
 ];
 const showCreateTest = ref(false);
 const loading = ref(false); const saving = ref(false); const saveError = ref("");
@@ -504,12 +520,11 @@ const createGroup = async () => {
   newGroupName.value = "";
 };
 
-
-
 const deleteGroup = async (id: string) => {
   await supabase.from("groups").delete().eq("id", id);
   groups.value = groups.value.filter((g: any) => g.id !== id);
 };
+
 const showTelegramModal = ref(false);
 const linkingGroup = ref<any>(null);
 const showSendResultsModal = ref(false);
@@ -559,18 +574,19 @@ const sendResultsToGroup = async (groupId: string) => {
     );
     const json = await res.json();
     if (res.ok && json.success) {
-      sendResultsMsg.value = `✅ ${json.sent} ta natija yuborildi!`;
+      sendResultsMsg.value = `${json.sent} ta natija yuborildi!`;
       setTimeout(() => (showSendResultsModal.value = false), 1500);
     } else {
       sendResultsError.value = true;
-      sendResultsMsg.value = `❌ ${json.error || "Xato yuz berdi"}`;
+      sendResultsMsg.value = `${json.error || "Xato yuz berdi"}`;
     }
   } catch (e: any) {
     sendResultsError.value = true;
-    sendResultsMsg.value = `❌ ${e.message}`;
+    sendResultsMsg.value = `${e.message}`;
   }
   sendingResults.value = false;
 };
+
 const showAssignModal = ref(false);
 const assigningTest = ref<any>(null);
 const selectedGroups = ref<string[]>([]);

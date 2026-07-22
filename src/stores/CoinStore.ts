@@ -5,6 +5,7 @@ import { saveNotification } from "../lib/Notification";
 
 export const useCoinStore = defineStore("coin", () => {
   const coins = ref(0);
+  const diamonds = ref(0);
   const progress = ref(0);
   const claimedMilestones = ref<number[]>([]);
   const loading = ref(false);
@@ -51,6 +52,7 @@ export const useCoinStore = defineStore("coin", () => {
       claimedMilestones.value = [];
     } else {
       coins.value = data.coins ?? 0;
+      diamonds.value = data.diamonds ?? 0;
       progress.value = data.progress ?? 0;
       claimedMilestones.value = data.claimed_milestones ?? [];
 
@@ -107,10 +109,10 @@ export const useCoinStore = defineStore("coin", () => {
     if (penaltyApplied) {
       await saveNotification(
         userId,
-        "3 kun kelmadingiz! 😔",
+        "3 kun kelmadingiz!",
         `${diffDays} kun yo'q edingiz — 30 tanga yechildi`,
-        "😔",
-        "-30 🪙",
+        "Frown",
+        "-30",
         "bg-red-50",
         "text-red-500",
         "bg-red-50 text-red-900",
@@ -134,40 +136,52 @@ export const useCoinStore = defineStore("coin", () => {
       .eq("user_id", user.id);
   };
 
-  // ── Milestone olish ────────────────────────────────────────
-  const claimMilestone = async (milestone: number) => {
-    if (!canClaimMilestone(milestone)) return;
+  // ── Milestone olish (olmos bilan 2x/3x qilish mumkin) ──────
+  // multiplier: 1 (oddiy), 2 (20 olmos), 3 (40 olmos) — narxlar
+  // DIAMOND_MULTIPLIER_COST da belgilangan.
+  const claimMilestone = async (milestone: number, multiplier: 1 | 2 | 3 = 1) => {
+    if (!canClaimMilestone(milestone)) return false;
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return false;
 
-    const reward = 10;
+    const diamondCost = multiplier === 3 ? 40 : multiplier === 2 ? 20 : 0;
+    if (diamondCost > 0 && diamonds.value < diamondCost) return false;
+
+    const reward = 10 * multiplier;
     const newCoins = coins.value + reward;
+    const newDiamonds = diamonds.value - diamondCost;
     const newClaimed = [...claimedMilestones.value, milestone];
 
     coins.value = newCoins;
+    diamonds.value = newDiamonds;
     claimedMilestones.value = newClaimed;
 
     const { error } = await supabase
       .from("coins")
       .update({
         coins: newCoins,
+        diamonds: newDiamonds,
         claimed_milestones: newClaimed,
       })
       .eq("user_id", user.id);
 
     if (error) {
       console.error("claimMilestone error:", error);
-      return;
+      // rollback local state on failure
+      coins.value -= reward;
+      diamonds.value += diamondCost;
+      claimedMilestones.value = claimedMilestones.value.filter((m) => m !== milestone);
+      return false;
     }
 
     await saveNotification(
       user.id,
-      `+10 tanga qo'lga kiritildi! 🪙`,
+      multiplier > 1 ? `+${reward} tanga qo'lga kiritildi! (×${multiplier})` : `+${reward} tanga qo'lga kiritildi!`,
       `${milestone} progress milestone mukofoti`,
-      "🪙",
-      "+10 🪙",
+      "Coins",
+      `+${reward} tanga`,
       "bg-amber-50",
       "text-amber-500",
       "bg-amber-50 text-amber-600",
@@ -175,6 +189,7 @@ export const useCoinStore = defineStore("coin", () => {
 
     // 100 tanga bonusini tekshir
     await checkCoinBonus(user.id, newCoins);
+    return true;
   };
 
   // ── 100 tanga bonus (+15) ──────────────────────────────────
@@ -195,10 +210,10 @@ export const useCoinStore = defineStore("coin", () => {
 
     await saveNotification(
       userId,
-      "100 tanga bonusi! 🎉",
+      "100 tanga bonusi!",
       "Tabriklaymiz! 100 tangaga yetdingiz — sizga 15 bonus tanga!",
-      "🎉",
-      "+15 🪙",
+      "PartyPopper",
+      "+15 tanga",
       "bg-green-50",
       "text-green-500",
       "bg-green-50 text-green-600",
@@ -207,6 +222,7 @@ export const useCoinStore = defineStore("coin", () => {
 
   return {
     coins,
+    diamonds,
     progress,
     claimedMilestones,
     loading,

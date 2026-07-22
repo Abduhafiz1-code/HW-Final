@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { Bot } from '@lucide/vue';
 import MobileNav from "./components/MobileNav.vue";
 import DesktopSidebar from "./components/DesktopSidebar.vue";
 import { RouterView, useRoute } from "vue-router";
 import { computed, ref, onMounted } from "vue";
 import FAB from './components/FAB.vue';
+import PwaStatus from './components/PwaStatus.vue';
+import ErrorBoundary from './components/ErrorBoundary.vue';
 import supabase from './supabase';
 
 const route = useRoute();
@@ -26,8 +29,8 @@ const showSidebar = computed(() => !route.meta.hideSidebar);
       <div class="flex flex-col items-center gap-6">
         <!-- Logo / branding -->
         <div
-          class="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-4xl shadow-xl">
-          🤖
+          class="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-xl">
+          <Bot :size="40" class="text-white" />
         </div>
         <div class="flex flex-col items-center gap-1">
           <p class="text-xl font-black text-slate-900 dark:text-white">Yuklanmoqda...</p>
@@ -47,10 +50,18 @@ const showSidebar = computed(() => !route.meta.hideSidebar);
     <div class="flex w-screen">
       <DesktopSidebar v-if="showSidebar" class="hidden md:flex" />
       <FAB v-if="showMobileNav" class="md:hidden" />
-      <RouterView class="w-full" />
+      <ErrorBoundary class="w-full">
+        <RouterView v-slot="{ Component }">
+          <Transition name="page" mode="out-in">
+            <component :is="Component" class="w-full" />
+          </Transition>
+        </RouterView>
+      </ErrorBoundary>
     </div>
     <MobileNav v-if="showMobileNav" class="md:hidden" />
   </div>
+
+  <PwaStatus />
 </template>
 
 <style>
@@ -61,6 +72,24 @@ const showSidebar = computed(() => !route.meta.hideSidebar);
 
 .fade-enter-from,
 .fade-leave-to {
+  opacity: 0;
+}
+
+/* Smooth page-to-page transition on route change */
+.page-enter-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.page-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-leave-to {
   opacity: 0;
 }
 </style>

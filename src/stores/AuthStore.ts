@@ -13,6 +13,9 @@ export const useAuthStore = defineStore("auth", () => {
   const aiUsageCount = ref(0);
   const coopUsageCount = ref(0);
   const premiumUntil = ref<string | null>(null);
+  const avatarUrl = ref<string | null>(null);
+  const avatarFrame = ref<string>("none");
+  const ownedFrames = ref<string[]>(["none"]);
 
   const isLoggedIn = computed(() => !!user.value);
   const isTeacher = computed(() => role.value === "teacher");
@@ -157,9 +160,13 @@ export const useAuthStore = defineStore("auth", () => {
     if (!user.value) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, role, is_premium, premium_until")
+      .select("full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames")
       .eq("id", user.value.id)
       .maybeSingle();
+
+    avatarUrl.value = data?.avatar_url ?? null;
+    avatarFrame.value = data?.avatar_frame ?? "none";
+    ownedFrames.value = data?.owned_frames?.length ? data.owned_frames : ["none"];
 
     const meta = user.value.user_metadata || {};
     role.value = (data?.role || meta.role || "student") as
@@ -197,7 +204,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  const updateProfile = async (fullName: string, avatarUrl = "") => {
+  // Bug fix: this used to default `avatarUrl` to "" and always upsert
+  // `avatar_url: avatarUrl || null` — so simply editing your display name
+  // (without touching your photo) silently wiped the avatar every time.
+  // Now `newAvatarUrl` is optional: omit it to keep whatever avatar is
+  // already saved; pass a value (or null) to explicitly change/remove it.
+  const updateProfile = async (fullName: string, newAvatarUrl?: string | null) => {
     if (!user.value) return false;
     loading.value = true;
     error.value = "";
@@ -207,15 +219,17 @@ export const useAuthStore = defineStore("auth", () => {
       loading.value = false;
       return false;
     }
+    const finalAvatarUrl = newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: user.value.id,
       email: user.value.email,
       full_name: cleanName,
-      avatar_url: avatarUrl || null,
+      avatar_url: finalAvatarUrl || null,
       role: role.value,
       is_premium: isPremium.value,
       premium_until: premiumUntil.value,
     });
+    if (!profileError) avatarUrl.value = finalAvatarUrl || null;
     const { data, error: authError } = await supabase.auth.updateUser({
       data: { full_name: cleanName },
     });
@@ -226,6 +240,37 @@ export const useAuthStore = defineStore("auth", () => {
     await syncProfile();
     loading.value = false;
     return !profileError && !authError;
+  };
+
+  // Faqat allaqachon egalik qilingan (yoki bepul) ramkani kiyish uchun —
+  // olmos yechilmaydi.
+  const setAvatarFrame = async (frame: string) => {
+    if (!user.value) return { ok: false, error: "Tizimga kirilmagan." };
+    const { error: err } = await supabase
+      .from("profiles")
+      .update({ avatar_frame: frame })
+      .eq("id", user.value.id);
+    if (!err) avatarFrame.value = frame;
+    return { ok: !err, error: err?.message };
+  };
+
+  // Yangi ramkani birinchi marta sotib olib, darhol kiyib qo'yadi.
+  // Diamond yechish User.vue tomonida (CoinStore orqali) amalga oshiriladi —
+  // bu funksiya faqat "owned_frames" ro'yxatiga qo'shadi va kiydiradi.
+  const unlockFrame = async (frame: string) => {
+    if (!user.value) return { ok: false, error: "Tizimga kirilmagan." };
+    const nextOwned = ownedFrames.value.includes(frame)
+      ? ownedFrames.value
+      : [...ownedFrames.value, frame];
+    const { error: err } = await supabase
+      .from("profiles")
+      .update({ owned_frames: nextOwned, avatar_frame: frame })
+      .eq("id", user.value.id);
+    if (!err) {
+      ownedFrames.value = nextOwned;
+      avatarFrame.value = frame;
+    }
+    return { ok: !err, error: err?.message };
   };
 
   const incrementAIUsage = async () => {
@@ -314,6 +359,9 @@ export const useAuthStore = defineStore("auth", () => {
     premiumUntil,
     aiUsageCount,
     coopUsageCount,
+    avatarUrl,
+    avatarFrame,
+    ownedFrames,
     isLoggedIn,
     isTeacher,
     displayName,
@@ -326,6 +374,8 @@ export const useAuthStore = defineStore("auth", () => {
     signIn,
     signOut,
     updateProfile,
+    setAvatarFrame,
+    unlockFrame,
     incrementAIUsage,
     incrementCoopUsage,
     activatePremium,

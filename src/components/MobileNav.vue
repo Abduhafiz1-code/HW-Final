@@ -22,7 +22,7 @@ import {
   Trophy,
   User,
 
-} from "lucide-vue-next";
+} from '@lucide/vue';
 
 
 

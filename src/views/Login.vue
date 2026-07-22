@@ -3,8 +3,9 @@
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <div
-          class="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-4xl mx-auto shadow-xl mb-4">
-          📚</div>
+          class="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mx-auto shadow-xl mb-4">
+          <BookOpen :size="36" class="text-white" />
+        </div>
         <h1 class="text-3xl font-black text-slate-900">HomeWork Helper</h1>
         <p class="text-slate-500 mt-1 text-sm">Aqlli o'qish platformasi</p>
       </div>
@@ -12,7 +13,8 @@
         <div class="flex rounded-2xl bg-slate-100 p-1 mb-6">
           <button @click="tab = 'login'" :class="tab === 'login' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
             class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">Kirish</button>
-          <button @click="tab = 'signup'" :class="tab === 'signup' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+          <button @click="tab = 'signup'"
+            :class="tab === 'signup' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
             class="flex-1 py-2 rounded-xl text-sm font-bold transition-all">Ro'yxat</button>
         </div>
 
@@ -51,7 +53,7 @@
           </div>
           <div>
             <label class="text-sm font-semibold text-slate-700 block mb-1">Parol</label>
-            <input v-model="password" type="password" placeholder="Kamida 6 ta belgi"
+            <input v-model="password" type="password" placeholder="Kamida 8 ta belgi"
               class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:border-orange-400 transition" />
           </div>
           <!-- Role selector -->
@@ -61,12 +63,12 @@
               <button @click="selectedRole = 'student'"
                 :class="selectedRole === 'student' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-slate-200 text-slate-600'"
                 class="py-3 px-4 rounded-2xl border-2 font-bold text-sm transition text-center">
-                🎓 O'quvchi
+                <GraduationCap :size="16" class="inline -mt-0.5" /> O'quvchi
               </button>
               <button @click="selectedRole = 'teacher'"
                 :class="selectedRole === 'teacher' ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-600'"
                 class="py-3 px-4 rounded-2xl border-2 font-bold text-sm transition text-center">
-                👨‍🏫 O'qituvchi
+                <School :size="16" class="inline -mt-0.5" /> O'qituvchi
               </button>
             </div>
           </div>
@@ -92,6 +94,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
+import { BookOpen, GraduationCap, School } from '@lucide/vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/AuthStore';
 const router = useRouter();

@@ -14,7 +14,9 @@
             <!-- Success -->
             <div v-if="submitted"
                 class="bg-green-500/10 dark:bg-green-500/20 border border-green-400/30 rounded-3xl p-8 text-center">
-                <div class="text-5xl mb-4">🎉</div>
+                <div class="flex justify-center mb-4">
+                    <CheckCircle :size="48" class="text-green-500" />
+                </div>
                 <h2 class="text-xl font-black text-green-600 dark:text-green-300">Rahmat!</h2>
                 <p class="text-slate-500 dark:text-white/60 text-sm mt-2">
                     Fikringiz yuborildi. Ilovani yaxshilashga yordam berganingiz uchun tashakkur!
@@ -28,7 +30,9 @@
             <div v-else>
                 <!-- Hero -->
                 <div class="text-center mb-8">
-                    <div class="text-6xl mb-3">💬</div>
+                    <div class="flex justify-center mb-3">
+                        <FileText :size="48" class="text-orange-500" />
+                    </div>
                     <h2 class="text-3xl font-black mb-2">Fikringiz muhim!</h2>
                     <p class="text-slate-500 dark:text-white/60 text-sm">
                         Ilovada nima yetishmayapti? Nimani yaxshilash kerak? Bizga ayting.
@@ -41,7 +45,7 @@
                         ? 'border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300'
                         : 'border-slate-200 text-slate-500 dark:border-white/10 dark:text-white/50'" class="flex flex-col items-center gap-1 py-3 rounded-2xl border-2 font-bold text-xs transition-all
                    hover:bg-slate-50 dark:hover:bg-white/5">
-                        <span class="text-xl">{{ c.icon }}</span>
+                        <component :is="c.icon" :size="20" />
                         {{ c.label }}
                     </button>
                 </div>
@@ -75,16 +79,24 @@
 
                     <button @click="submitFeedback" :disabled="sending" class="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-base
                    hover:opacity-90 transition disabled:opacity-60 active:scale-95">
-                        {{ sending ? '⏳ Yuborilmoqda...' : '📨 Yuborish' }}
+                        <span v-if="sending" class="flex items-center justify-center gap-2">
+                            <Loader :size="16" class="animate-spin" /> Yuborilmoqda...
+                        </span>
+                        <span v-else class="flex items-center justify-center gap-2">
+                            <FileText :size="16" /> Yuborish
+                        </span>
                     </button>
                 </div>
             </div>
         </div>
+        <OnboardingTooltip pageId="Feedback" title="Fikr-mulohaza" description="Ilova haqida fikringizni qoldiring" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { FileText, CheckCircle, Loader } from '@lucide/vue';
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
 import { useAuthStore } from '../stores/AuthStore';
 import supabase from '../supabase';
 

@@ -1,19 +1,22 @@
 <template>
     <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-black text-slate-900">🚫 Bloklangan talabalar</h2>
+            <h2 class="text-lg font-black text-slate-900">
+                <Ban :size="20" class="inline -mt-0.5 text-red-500" /> Bloklangan talabalar
+            </h2>
             <button @click="loadBlocks" :disabled="loading"
                 class="text-xs font-bold text-orange-500 hover:text-orange-600 transition disabled:opacity-50">
-                {{ loading ? "Yuklanmoqda..." : "↻ Yangilash" }}
+                <Loader v-if="loading" :size="12" class="inline animate-spin -mt-0.5" />
+                {{ loading ? " Yuklanmoqda..." : "Yangilash" }}
             </button>
         </div>
 
         <div v-if="loading" class="text-center py-10 text-slate-400 text-sm">
-            Yuklanmoqda...
+            <Loader :size="20" class="inline animate-spin -mt-0.5 mr-1" /> Yuklanmoqda...
         </div>
 
         <div v-else-if="blocks.length === 0" class="text-center py-10">
-            <div class="text-4xl mb-2">✅</div>
+            <div class="mb-2"><CheckCircle :size="36" class="mx-auto text-green-400" /></div>
             <p class="text-sm text-slate-500">Bloklangan talaba yo'q</p>
         </div>
 
@@ -35,7 +38,9 @@
                 </div>
                 <button @click="unblock(b)" :disabled="unblockingId === b.id"
                     class="flex-shrink-0 px-4 py-2 bg-green-500 text-white text-xs font-black rounded-xl hover:bg-green-600 transition active:scale-95 disabled:opacity-50">
-                    {{ unblockingId === b.id ? "..." : "✓ Ruxsat berish" }}
+                    <Loader v-if="unblockingId === b.id" :size="12" class="inline animate-spin -mt-0.5" />
+                    <CheckCircle v-else :size="12" class="inline -mt-0.5" />
+                    {{ unblockingId === b.id ? "" : " Ruxsat berish" }}
                 </button>
             </div>
         </div>
@@ -43,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+import { Ban, CheckCircle, Loader } from '@lucide/vue';
 import { ref, onMounted } from "vue";
 import supabase from "../supabase";
 

@@ -99,6 +99,24 @@ const router = createRouter({
       component: () => import("../views/Groups.vue"),
       meta: { hideMobileNav: true },
     },
+    {
+      path: "/events",
+      name: "events",
+      component: () => import("../views/Events.vue"),
+      meta: { hideMobileNav: true },
+    },
+    {
+      path: "/events/vocab",
+      name: "event-vocab",
+      component: () => import("../views/EventVocab.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
+      path: "/events/subjects",
+      name: "event-subjects",
+      component: () => import("../views/EventSubjects.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
   ],
 });
 

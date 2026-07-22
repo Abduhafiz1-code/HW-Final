@@ -7,8 +7,8 @@
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-3">
             <button @click="goBack"
-              class="w-10 h-10 rounded-[14px] border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 transition">
-              ←
+              class="w-10 h-10 rounded-[14px] border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 active:scale-95 transition">
+              <ArrowLeft :size="18" />
             </button>
             <div>
               <p class="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-medium">
@@ -30,18 +30,20 @@
       </div>
 
       <!-- NOTIFICATIONS -->
-      <div class="divide-y divide-slate-100 dark:divide-slate-700">
-        <article v-for="notif in notifications" :key="notif.id"
-          class="flex items-start gap-4 px-5 py-4 relative hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer"
-          :class="{ 'bg-indigo-50/30 dark:bg-indigo-900/10': notif.unread }">
+      <div v-if="!loading && notifications.length === 0" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-300 dark:text-slate-600">
+        <BellOff :size="40" />
+        <p class="text-sm text-slate-400 dark:text-slate-500 font-medium">Hozircha bildirishnomalar yo'q</p>
+      </div>
+      <div v-else class="divide-y divide-slate-100 dark:divide-slate-700">
+        <article v-for="notif in notifications" :key="notif.id" @click="markRead(notif.id)"
+          class="flex items-start gap-4 px-5 py-4 relative hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer animate-fade-in-up"
+          :class="{ 'bg-indigo-50/30 dark:bg-indigo-900/10': !notif.is_read }">
           <!-- Unread dot -->
-          <span v-if="notif.unread" class="absolute top-5 right-4 w-2 h-2 rounded-full bg-indigo-500"></span>
+          <span v-if="!notif.is_read" class="absolute top-5 right-4 w-2 h-2 rounded-full bg-indigo-500"></span>
 
           <!-- Icon -->
-          <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" :class="notif.iconBg">
-            <span class="text-lg font-semibold" :class="notif.iconColor">
-              {{ notif.icon || "•" }}
-            </span>
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" :class="notif.icon_bg">
+            <component :is="iconFor(notif.icon)" :size="22" :class="notif.icon_color" />
           </div>
 
           <!-- Content -->
@@ -50,20 +52,21 @@
               <h2 class="text-sm font-semibold text-slate-900 dark:text-white">
                 {{ notif.title }}
               </h2>
-              <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ notif.time }}</span>
+              <span class="text-[11px] text-slate-400 dark:text-slate-500 flex-shrink-0 ml-2">{{ formatTime(notif.created_at) }}</span>
             </div>
             <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {{ notif.text }}
             </p>
-            <span
+            <span v-if="notif.badge"
               class="inline-block mt-2 text-[11px] font-semibold text-slate-900 dark:text-white px-3 py-1 rounded-full"
-              :class="notif.badgeClass">
+              :class="notif.badge_class">
               {{ notif.badge }}
             </span>
           </div>
         </article>
       </div>
     </div>
+    <OnboardingTooltip pageId="Notifications" title="Bildirishnomalar" description="Yangi xabarlar va muhim bildirishnomalar" />
   </div>
 </template>
 
@@ -71,6 +74,19 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import supabase from "../supabase";
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
+import {
+  ArrowLeft, BellOff, Bell, Coins, PartyPopper, Target, FileText,
+  Gamepad2, Frown,
+} from '@lucide/vue';
+
+// Notifications store their icon as a @lucide/vue component name
+// (see src/lib/Notification.ts). Map that name to the actual component here
+// so every notification renders a real icon — never raw emoji or plain text.
+const ICONS: Record<string, any> = {
+  Bell, Coins, PartyPopper, Target, FileText, Gamepad2, Frown,
+};
+const iconFor = (name?: string) => (name && ICONS[name]) || Bell;
 
 const router = useRouter();
 const goBack = () => window.history.length > 1 ? router.back() : router.push("/");
@@ -79,6 +95,11 @@ const notifications = ref<any[]>([]);
 const loading = ref(false);
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.is_read).length);
+
+const formatTime = (t: string) => {
+  if (!t) return "";
+  return new Date(t).toLocaleString("uz", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+};
 
 const fetchNotifications = async () => {
   loading.value = true;
@@ -106,6 +127,5 @@ const markRead = async (id: string) => {
   if (n) n.is_read = true;
 };
 
-console.log(markRead);
 onMounted(() => fetchNotifications());
 </script>

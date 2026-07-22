@@ -3,10 +3,10 @@
     <div class="max-w-lg mx-auto">
       <div class="flex items-center gap-3 mb-6">
         <RouterLink to="/"
-          class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition">
-          ←</RouterLink>
+          class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 transition">
+          <ArrowLeft :size="18" /></RouterLink>
         <div>
-          <h1 class="text-xl font-black text-slate-900">📋 Test yechish</h1>
+          <h1 class="text-xl font-black text-slate-900"><ClipboardList :size="20" class="inline-block mr-1" /> Test yechish</h1>
           <p class="text-xs text-slate-500">O'qituvchi kodi bilan kirish</p>
         </div>
       </div>
@@ -15,7 +15,7 @@
       <div v-if="!test && !loading && !blocked">
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <div class="text-center mb-6">
-            <div class="text-5xl mb-3">🔑</div>
+            <div class="mb-3 flex justify-center"><Key :size="48" class="text-slate-700" /></div>
             <h2 class="text-lg font-black text-slate-900">
               Test kodini kiriting
             </h2>
@@ -25,13 +25,14 @@
           </div>
           <input v-model="codeInput" @input="codeInput = codeInput.toUpperCase()" @keyup.enter="findTest" maxlength="4"
             placeholder="AB3X"
-            class="w-full text-center text-3xl font-black tracking-[0.5em] px-4 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 !text-slate-900 focus:outline-none focus:border-orange-400 transition uppercase mb-4" />
+            class="w-full text-center text-3xl font-black tracking-[0.5em] px-4 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:border-orange-400 transition uppercase mb-4" />
           <p v-if="notFound" class="text-red-500 text-sm text-center bg-red-50 rounded-xl px-4 py-2 mb-3">
-            ❌ Bunday kodli test topilmadi
+            <XCircle :size="16" class="inline-block mr-1" /> Bunday kodli test topilmadi
           </p>
           <button @click="findTest" :disabled="codeInput.length < 4 || searching"
             class="w-full py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition disabled:opacity-50 active:scale-95">
-            {{ searching ? "🔍 Qidirilmoqda..." : "Testni topish →" }}
+            <template v-if="searching"><Search :size="16" class="inline-block mr-1" /> Qidirilmoqda...</template>
+            <template v-else>Testni topish <ArrowRight :size="15" class="inline-block" /></template>
           </button>
         </div>
 
@@ -43,7 +44,7 @@
           <div v-for="r in myResults" :key="r.id"
             class="bg-white rounded-2xl border border-slate-200 p-4 mb-2 shadow-sm flex items-center justify-between">
             <div>
-              <p class="font-bold text-sm !text-slate-900">
+              <p class="font-bold text-sm text-slate-900">
                 {{ r.tests?.title }}
               </p>
               <p class="text-xs text-slate-500">
@@ -61,7 +62,7 @@
 
       <!-- Blocked -->
       <div v-else-if="blocked" class="bg-white rounded-3xl border border-red-200 p-8 text-center shadow-sm">
-        <div class="text-6xl mb-4">🚫</div>
+        <div class="mb-4 flex justify-center"><Ban :size="56" class="text-red-500" /></div>
         <h2 class="text-xl font-black text-red-600">Siz testdan chiqarildingiz</h2>
         <p class="text-sm text-slate-500 mt-2">
           Test davomida ekrandan uzoqlashganingiz uchun test bekor qilindi.
@@ -85,8 +86,8 @@
       <!-- Test found, not started -->
       <div v-else-if="test && !started && !finished">
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm text-center">
-          <div class="text-5xl mb-4">📝</div>
-          <h2 class="text-xl font-black !text-slate-900">{{ test.title }}</h2>
+          <div class="mb-4 flex justify-center"><FileText :size="48" class="text-slate-700" /></div>
+          <h2 class="text-xl font-black text-slate-900">{{ test.title }}</h2>
           <p class="text-slate-500 text-sm mt-1">{{ test.subject }}</p>
           <div class="flex justify-center gap-6 mt-5 mb-6">
             <div class="text-center">
@@ -103,18 +104,18 @@
             </div>
           </div>
           <p class="text-xs text-amber-600 bg-amber-50 rounded-xl px-4 py-2 mb-4">
-            ⚠️ Test davomida boshqa ekranga / tabga o'tmang. 5 soniyadan ko'p
+            <AlertTriangle :size="16" class="inline-block mr-1 text-amber-600" /> Test davomida boshqa ekranga / tabga o'tmang. 5 soniyadan ko'p
             uzoqlashsangiz, test avtomatik bekor qilinadi.
           </p>
           <button @click="startTest"
             class="w-full py-3 bg-orange-500 text-white font-black rounded-2xl hover:bg-orange-600 transition active:scale-95">
-            🚀 Testni boshlash
+            <Rocket :size="16" class="inline-block mr-1" /> Testni boshlash
           </button>
           <button @click="
             test = null;
           codeInput = '';
-          " class="w-full py-2 mt-2 text-slate-400 text-sm hover:text-slate-600 transition">
-            ← Orqaga
+          " class="w-full py-2 mt-2 text-slate-400 text-sm hover:text-slate-600 dark:hover:text-slate-300 transition flex items-center justify-center gap-1">
+            <ArrowLeft :size="14" /> Orqaga
           </button>
         </div>
       </div>
@@ -129,38 +130,35 @@
             }"></div>
           </div>
           <span
-            class="text-sm font-bold !text-slate-600 flex-shrink-0">{{ currentIdx }}/{{ test.questions.length }}</span>
+            class="text-sm font-bold text-slate-600 flex-shrink-0">{{ currentIdx }}/{{ test.questions.length }}</span>
         </div>
 
         <!-- Question card -->
-        <div class="!bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <p class="text-xs font-bold uppercase tracking-wider text-orange-500 mb-2">
             Savol {{ currentIdx + 1 }}
           </p>
-          <p class="text-lg font-black !text-slate-900 mb-6 leading-snug">
+          <p class="text-lg font-black text-slate-900 mb-6 leading-snug">
             {{ currentQ.question }}
           </p>
           <div class="space-y-3">
             <button v-for="opt in currentQ.options" :key="opt" @click="selectAnswer(opt)" :disabled="!!selectedAnswer"
               :class="selectedAnswer === opt
-                ? 'border-orange-500 bg-orange-50 !text-orange-700'
-                : 'border-slate-200 !bg-white !text-slate-800 hover:border-orange-300 hover:bg-orange-50'
+                ? 'border-orange-500 bg-orange-50 text-orange-700'
+                : 'border-slate-200 bg-white text-slate-800 hover:border-orange-300 hover:bg-orange-50'
                 "
               class="w-full px-5 py-3.5 rounded-2xl border-2 text-left font-semibold text-sm transition disabled:cursor-default">
               {{ opt }}
             </button>
           </div>
           <div v-if="selectedAnswer" class="mt-5">
-            <p class="text-sm font-bold !text-slate-500">
-              ✔️ Javobingiz qabul qilindi
+            <p class="text-sm font-bold text-slate-500">
+              <Check :size="16" class="inline-block mr-1" /> Javobingiz qabul qilindi
             </p>
             <button @click="nextQuestion"
               class="mt-3 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition active:scale-95">
-              {{
-                currentIdx + 1 >= test.questions.length
-                  ? "🏁 Yakunlash"
-                  : "Keyingi →"
-              }}
+              <template v-if="currentIdx + 1 < test.questions.length">Keyingi <ArrowRight :size="15" class="inline-block" /></template>
+              <template v-if="currentIdx + 1 >= test.questions.length"><Flag :size="16" class="inline-block mr-1" /> Yakunlash</template>
             </button>
           </div>
         </div>
@@ -169,18 +167,13 @@
       <!-- Finished -->
       <div v-else-if="finished">
         <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center shadow-sm">
-          <div class="text-6xl mb-4">
-            {{
-              percent >= 90
-                ? "🏆"
-                : percent >= 70
-                  ? "🌟"
-                  : percent >= 50
-                    ? "👍"
-                    : "💪"
-            }}
+          <div class="mb-4 flex justify-center">
+            <Trophy v-if="percent >= 90" :size="56" class="text-yellow-500" />
+            <Star v-else-if="percent >= 70" :size="56" class="text-yellow-500" />
+            <ThumbsUp v-else-if="percent >= 50" :size="56" class="text-slate-500" />
+            <ThumbsUp v-else :size="56" class="text-slate-400" />
           </div>
-          <h2 class="text-2xl font-black !text-slate-900">Test yakunlandi!</h2>
+          <h2 class="text-2xl font-black text-slate-900">Test yakunlandi!</h2>
           <p class="text-slate-500 mt-1 text-sm">{{ test.title }}</p>
 
           <div class="mt-6 bg-slate-50 rounded-2xl p-5">
@@ -196,7 +189,7 @@
             </div>
           </div>
 
-          <p class="mt-4 font-bold !text-slate-700">
+          <p class="mt-4 font-bold text-slate-700">
             {{
               percent >= 90
                 ? "Ajoyib natija! Siz zo'rsiz!"
@@ -209,10 +202,10 @@
           </p>
 
           <div v-if="saving" class="mt-3 text-xs text-slate-400">
-            ⏳ Natija saqlanmoqda...
+            <Loader :size="14" class="inline-block mr-1 animate-spin" /> Natija saqlanmoqda...
           </div>
           <div v-else class="mt-3 text-xs text-green-500">
-            ✅ Natija o'qituvchiga yuborildi
+            <CheckCircle :size="14" class="inline-block mr-1 text-green-500" /> Natija o'qituvchiga yuborildi
           </div>
 
           <div class="flex gap-3 mt-6">
@@ -231,8 +224,8 @@
     <!-- Ekrandan uzoqlashganda chiqadigan ogohlantirish (qaytib kelganda ko'rinadi) -->
     <div v-if="showLeaveWarning" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
       <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-xl">
-        <div class="text-5xl mb-3">⚠️</div>
-        <h3 class="text-lg font-black !text-slate-900">Diqqat!</h3>
+        <div class="mb-3 flex justify-center"><AlertTriangle :size="48" class="text-red-500" /></div>
+        <h3 class="text-lg font-black text-slate-900">Diqqat!</h3>
         <p class="text-sm text-slate-500 mt-2">
           Siz ekrandan uzoqlashdingiz. Testga qaytmasangiz
           <span class="font-black text-red-500">{{ leaveCountdown }}</span>
@@ -240,6 +233,7 @@
         </p>
       </div>
     </div>
+    <OnboardingTooltip pageId="StudentQuiz" title="Test yechish" description="Kod orqali o'qituvchi testini yeching" />
   </div>
 </template>
 
@@ -248,6 +242,26 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import supabase from "../supabase";
 import { useCoinStore } from "../stores/CoinStore";
 import { saveNotification } from "../lib/Notification";
+import {
+  ClipboardList,
+  Key,
+  Search,
+  Ban,
+  FileText,
+  Rocket,
+  Flag,
+  Trophy,
+  Star,
+  ThumbsUp,
+  Loader,
+  CheckCircle,
+  AlertTriangle,
+  Check,
+  XCircle,
+  ArrowLeft,
+  ArrowRight,
+} from '@lucide/vue';
+import OnboardingTooltip from '../components/OnboardingTooltip.vue';
 
 const coinStore = useCoinStore();
 const codeInput = ref("");
@@ -411,11 +425,15 @@ const findTest = async () => {
   if (codeInput.value.length < 4) return;
   searching.value = true;
   notFound.value = false;
-  const { data } = await supabase
-    .from("tests")
-    .select("*")
-    .eq("code", codeInput.value)
-    .single();
+  // Bug fix / xavfsizlik: avval "tests" jadvali to'g'ridan-to'g'ri o'qilardi
+  // (RLS "USING (true)" bilan) — bu shuni anglatardiki, kod kiritmasdan
+  // turib "select *" so'rovi bilan BARCHA o'qituvchilarning testlari va
+  // ularning javob kalitlari olib ketilishi mumkin edi. Endi faqat aniq
+  // kodga mos test qaytaradigan SECURITY DEFINER RPC ishlatiladi
+  // (SUPABASE_UPDATE_4.sql'ni ishga tushiring).
+  const { data } = (await supabase
+    .rpc("get_test_by_code", { test_code: codeInput.value })
+    .maybeSingle()) as { data: any };
   if (data) {
     const {
       data: { user },
@@ -521,9 +539,9 @@ const saveResult = async () => {
 
   await saveNotification(
     user.id,
-    "Test yakunlandi! 🎯",
+    "Test yakunlandi!",
     `${test.value.title} — ${percent.value}% natija`,
-    "🎯",
+    "Target",
     `${score.value}/${test.value.questions.length}`,
     "bg-orange-50",
     "text-orange-500",

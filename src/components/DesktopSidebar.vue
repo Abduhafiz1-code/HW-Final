@@ -43,7 +43,8 @@ import {
     MessagesSquare,
     PanelLeftClose,
     PanelLeftOpen,
-} from "lucide-vue-next";
+    Sparkles,
+} from '@lucide/vue';
 
 import { useAuthStore } from "../stores/AuthStore";
 
@@ -55,6 +56,7 @@ const desktopItems = computed(() => {
         { label: "Home", to: "/", icon: Book },
 
         { label: "Top", to: "/map", icon: Trophy },
+        { label: "Event'lar", to: "/events", icon: Sparkles },
         { label: "Chat", to: "/chat", icon: MessagesSquare },
         { label: "AI", to: "/ai-chat", icon: Bot },
         { label: "Translate", to: "/translate", icon: Bot },

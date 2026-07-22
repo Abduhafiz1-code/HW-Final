@@ -9,7 +9,12 @@
           <p class="text-orange-100 text-xs font-bold uppercase tracking-wider">Hisobingiz</p>
           <div class="flex items-end gap-1 mt-0.5">
             <span class="text-4xl font-black text-white">{{ coinStore.coins }}</span>
-            <span class="text-xl mb-1">🪙</span>
+            <span class="text-xl mb-1"><Coins :size="26" class="text-white" /></span>
+          </div>
+          <div class="flex items-center gap-1 mt-1">
+            <Gem :size="14" class="text-cyan-100" />
+            <span class="text-cyan-50 text-xs font-black">{{ coinStore.diamonds }}</span>
+            <span class="text-cyan-100/80 text-[10px] font-semibold">olmos</span>
           </div>
         </div>
         <!-- Ring -->
@@ -55,9 +60,9 @@
                 ? 'bg-orange-500 border-orange-400 animate-bounce shadow-lg shadow-orange-200'
                 : 'bg-slate-100 border-slate-200 opacity-40 cursor-not-allowed'
           ]" class="w-11 h-11 rounded-2xl border-2 flex items-center justify-center transition-all">
-            <span v-if="coinStore.claimedMilestones.includes(m)">✅</span>
-            <span v-else-if="coinStore.canClaimMilestone(m)">🎁</span>
-            <span v-else>🔒</span>
+            <span v-if="coinStore.claimedMilestones.includes(m)"><CheckCircle2 :size="22" class="text-green-600" /></span>
+            <span v-else-if="coinStore.canClaimMilestone(m)"><Gift :size="22" class="text-white" /></span>
+            <span v-else><Lock :size="20" class="text-slate-400" /></span>
           </button>
           <p class="text-[10px] font-black text-slate-400">{{ m }}</p>
         </div>
@@ -67,12 +72,30 @@
     <!-- Hint -->
     <div class="px-4 pt-3 pb-4">
       <div v-if="hasClaimable"
-        class="flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-2.5">
-        <span class="text-base animate-bounce">🎁</span>
-        <p class="text-xs text-orange-600 font-bold">Sovg'angiz tayyor! Bosib oling!</p>
+        class="flex flex-col gap-2.5 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3">
+        <div class="flex items-center gap-2">
+          <Gift :size="20" class="text-orange-500 animate-bounce" />
+          <p class="text-xs text-orange-600 font-bold">Sovg'angiz tayyor! Bosib oling!</p>
+        </div>
+        <div class="flex gap-2">
+          <button @click="claim(1)"
+            class="flex-1 bg-orange-500 hover:bg-orange-600 active:scale-95 transition text-white text-xs font-black py-2 rounded-xl">
+            Oddiy oling (+10)
+          </button>
+          <button @click="claim(2)" :disabled="coinStore.diamonds < 20"
+            :class="coinStore.diamonds < 20 ? 'opacity-40 cursor-not-allowed bg-cyan-200' : 'bg-cyan-500 hover:bg-cyan-600 active:scale-95'"
+            class="flex-1 flex items-center justify-center gap-1 transition text-white text-xs font-black py-2 rounded-xl">
+            2x <Gem :size="12" />20
+          </button>
+          <button @click="claim(3)" :disabled="coinStore.diamonds < 40"
+            :class="coinStore.diamonds < 40 ? 'opacity-40 cursor-not-allowed bg-purple-200' : 'bg-purple-500 hover:bg-purple-600 active:scale-95'"
+            class="flex-1 flex items-center justify-center gap-1 transition text-white text-xs font-black py-2 rounded-xl">
+            3x <Gem :size="12" />40
+          </button>
+        </div>
       </div>
       <div v-else class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2.5">
-        <span class="text-base">📈</span>
+        <Award :size="20" class="text-orange-500" />
         <p class="text-xs text-slate-500 font-semibold">
           Keyingi sovg'a: <span class="text-orange-500 font-black">{{ nextMilestone }}</span> progressda
         </p>
@@ -83,6 +106,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { Coins, CheckCircle2, Gift, Lock, Award, Gem } from '@lucide/vue';
 import { useCoinStore } from '../stores/CoinStore';
 
 const coinStore = useCoinStore();
@@ -106,6 +130,17 @@ const hasClaimable = computed(() =>
 const nextMilestone = computed(() => {
   return visibleMilestones.value.find(m => !coinStore.claimedMilestones.includes(m) && coinStore.progress < m) ?? '?';
 });
+
+// Hozir olish mumkin bo'lgan birinchi milestone (multiplier bilan olish uchun)
+const claimableMilestone = computed(() =>
+  visibleMilestones.value.find(m => coinStore.canClaimMilestone(m))
+);
+
+const claim = (multiplier: 1 | 2 | 3) => {
+  const m = claimableMilestone.value;
+  if (m === undefined) return;
+  coinStore.claimMilestone(m, multiplier);
+};
 
 onMounted(() => coinStore.fetchCoins());
 </script>

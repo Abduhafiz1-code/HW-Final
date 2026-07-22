@@ -23,10 +23,10 @@
           <div class="grid gap-4 px-4 py-6 sm:grid-cols-2 sm:px-6">
             <RouterLink to="/history">
               <article
-                class="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                class="group rounded-[1.75rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md card-hover">
                 <div class="flex items-center gap-4">
-                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-white shadow-sm">
-                    <img src="../images/HistoryRobot.png" alt="History" class="w-10 h-10 object-contain" />
+                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-orange-50 dark:bg-orange-500/10 shadow-sm">
+                    <Clock :size="28" class="text-orange-500" />
                   </div>
 
                   <div>
@@ -39,18 +39,18 @@
                   </div>
                 </div>
 
-                <div class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
-                  Boshqarishga o'tish →
+                <div class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 flex items-center gap-1">
+                  Boshqarishga o'tish <ArrowRight :size="14" />
                 </div>
               </article>
             </RouterLink>
 
             <RouterLink to="/game">
               <article
-                class="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                class="group rounded-[1.75rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md card-hover">
                 <div class="flex items-center gap-4">
-                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-white shadow-sm">
-                    <img src="../images/GamingRobot.png" alt="Game" class="w-10 h-10 object-contain" />
+                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-purple-50 dark:bg-purple-500/10 shadow-sm">
+                    <Gamepad2 :size="28" class="text-purple-500" />
                   </div>
 
                   <div>
@@ -61,18 +61,18 @@
                   </div>
                 </div>
 
-                <div class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
-                  O'ynashni boshlash →
+                <div class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 flex items-center gap-1">
+                  O'ynashni boshlash <ArrowRight :size="14" />
                 </div>
               </article>
             </RouterLink>
 
             <RouterLink to="/practice">
               <article
-                class="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                class="group rounded-[1.75rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md card-hover">
                 <div class="flex items-center gap-4">
-                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-white shadow-sm">
-                    <img src="../images/Planner.png" alt="Practice" class="w-10 h-10 object-contain" />
+                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-emerald-50 dark:bg-emerald-500/10 shadow-sm">
+                    <PenTool :size="28" class="text-emerald-500" />
                   </div>
 
                   <div>
@@ -85,18 +85,18 @@
                   </div>
                 </div>
 
-                <div class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
-                  Mashq qilish →
+                <div class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 flex items-center gap-1">
+                  Mashq qilish <ArrowRight :size="14" />
                 </div>
               </article>
             </RouterLink>
 
             <RouterLink to="/quiz-coop">
               <article
-                class="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                class="group rounded-[1.75rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md card-hover">
                 <div class="flex items-center gap-4">
-                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-white shadow-sm">
-                    <img src="../images/QuizRobot.png" alt="Quiz" class="w-10 h-10 object-contain" />
+                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-blue-50 dark:bg-blue-500/10 shadow-sm">
+                    <MessageCircleQuestion :size="28" class="text-blue-500" />
                   </div>
 
                   <div>
@@ -107,8 +107,8 @@
                   </div>
                 </div>
 
-                <div class="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
-                  Testlarni boshlash →
+                <div class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 flex items-center gap-1">
+                  Testlarni boshlash <ArrowRight :size="14" />
                 </div>
               </article>
             </RouterLink>
@@ -119,4 +119,6 @@
   </section>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { Clock, Gamepad2, PenTool, MessageCircleQuestion, ArrowRight } from '@lucide/vue';
+</script>

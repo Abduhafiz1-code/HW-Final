@@ -1,17 +1,12 @@
 <script setup lang="ts">
-// import { Users } from "@lucide/vue";
-import { useAuthStore } from "../stores/AuthStore";
-const authStore = useAuthStore();
+import { Users } from '@lucide/vue';
 </script>
 
 <template>
-    <div>
-        <RouterLink v-if="!authStore.isTeacher" to="/groups">
-
-            👥
-
-        </RouterLink>
-    </div>
+    <!-- Parent (FAB) already gates visibility by role and supplies the
+         circular button classes via attr fallthrough onto this root link,
+         so the whole circle is clickable — not just the icon. -->
+    <RouterLink to="/groups" class="flex items-center justify-center">
+        <Users :size="24" />
+    </RouterLink>
 </template>
-
-<style lang="scss" scoped></style>

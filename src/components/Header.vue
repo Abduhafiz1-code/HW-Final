@@ -1,24 +1,26 @@
 <template>
   <div
-    class="h-24 bg-no-repeat bg-cover overflow-hidden bg-center shadow-xs shadow-black flex justify-between items-center mt-4 rounded-xl px-5"
-    :style="{ backgroundImage: `url(${bg})` }">
+    class="h-24 bg-[url('/src/images/Header_bg_img.png')] overflow-hidden bg-center shadow-xs shadow-black flex justify-between items-center mt-4 rounded-xl px-5">
     <div>
-      <div class="flex flex-col text-sm md:text-xl text-left font-bold leading-tight">
+      <div class="flex flex-col text-sm md:text-xl text-left font-bold leading-tight text-white">
         <span>Xush kelibsiz!</span>
-        <span>{{ authStore.displayName }} 👋</span>
+        <span class="flex gap-2">{{ authStore.displayName }}
+
+        </span>
       </div>
     </div>
     <div>
       <span class="flex items-end">
-        <img class="w-40" src="../images/Header-img.png" alt="" />
+
+        <img :src="Header_img" alt="Header Image" class="w-44  rounded-full ml-2" />
       </span>
     </div>
 
   </div>
 </template>
 <script setup lang="ts">
-import bg from '../images/Header_bg_img.png';
+import Header_img from '../images/Header-img.png'
+// import { GraduationCap } from '@lucide/vue';
 import { useAuthStore } from '../stores/AuthStore';
-// import ThemeToggle from './ThemeToggle.vue';/
 const authStore = useAuthStore();
 </script>
