@@ -38,7 +38,7 @@ Loyiha ilova ko'rinishida ham (PWA — telefonga "bosh ekranga qo'shish" orqali 
 3. **Environment Variables** bo'limiga qo'shing:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   (qiymatlarni `.env.local` faylidan ko'chiring)
+     (qiymatlarni `.env.local` faylidan ko'chiring)
 4. Build command: `npm run build`, Output directory: `dist` (Vercel buni avtomatik aniqlaydi). `vercel.json` fayli SPA yo'naltirishlarini o'zi sozlab qo'yadi.
 5. **Deploy** tugmasini bosing. Bir necha daqiqada `https://loyiha-nomi.vercel.app` manzili tayyor bo'ladi.
 6. O'z domeningiz bo'lsa: Vercel loyihasida **Settings → Domains** dan domeningizni qo'shing va ko'rsatilgan DNS yozuvini (odatda `CNAME`) domen provayderingizda (masalan, Namecheap, GoDaddy) sozlang.
@@ -53,6 +53,7 @@ Loyiha ilova ko'rinishida ham (PWA — telefonga "bosh ekranga qo'shish" orqali 
 ### Telefonga ilova sifatida o'rnatish (PWA)
 
 Sayt deploy qilingandan so'ng, foydalanuvchilar hech qanday App Store/Play Market'siz o'rnatishlari mumkin:
+
 - **Android (Chrome)**: sayt ochilganda pastda "Ilovani o'rnatish" taklifi chiqadi, yoki ⋮ menyu → "Bosh ekranga qo'shish".
 - **iPhone (Safari)**: pastdagi ulashish tugmasi → "Bosh ekranga qo'shish".
 
@@ -71,6 +72,7 @@ src/
 │   ├── AI.vue             ← Real Anthropic API
 │   ├── User.vue           ← Logout qo'shildi
 │   └── HomeView.vue       ← Premium + Translate tugmalari
+│   └── Events.vue       ← Vaqtinchalik musobaqalar + Test yechish orqali olmoslar olish
 ├── stores/
 │   ├── AuthStore.ts       ← Yangi: Auth management
 │   ├── ChatStore.ts       ← Yangi: Chat & Friends

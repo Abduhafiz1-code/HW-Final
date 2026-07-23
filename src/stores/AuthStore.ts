@@ -16,6 +16,7 @@ export const useAuthStore = defineStore("auth", () => {
   const avatarUrl = ref<string | null>(null);
   const avatarFrame = ref<string>("none");
   const ownedFrames = ref<string[]>(["none"]);
+  const phone = ref<string | null>(null);
 
   const isLoggedIn = computed(() => !!user.value);
   const isTeacher = computed(() => role.value === "teacher");
@@ -160,13 +161,18 @@ export const useAuthStore = defineStore("auth", () => {
     if (!user.value) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames")
+      .select(
+        "full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone",
+      )
       .eq("id", user.value.id)
       .maybeSingle();
 
     avatarUrl.value = data?.avatar_url ?? null;
     avatarFrame.value = data?.avatar_frame ?? "none";
-    ownedFrames.value = data?.owned_frames?.length ? data.owned_frames : ["none"];
+    ownedFrames.value = data?.owned_frames?.length
+      ? data.owned_frames
+      : ["none"];
+    phone.value = data?.phone ?? null;
 
     const meta = user.value.user_metadata || {};
     role.value = (data?.role || meta.role || "student") as
@@ -209,7 +215,13 @@ export const useAuthStore = defineStore("auth", () => {
   // (without touching your photo) silently wiped the avatar every time.
   // Now `newAvatarUrl` is optional: omit it to keep whatever avatar is
   // already saved; pass a value (or null) to explicitly change/remove it.
-  const updateProfile = async (fullName: string, newAvatarUrl?: string | null) => {
+  // `newPhone` follows the same optional pattern: omit to keep the current
+  // phone number, pass a value (or null) to explicitly change/clear it.
+  const updateProfile = async (
+    fullName: string,
+    newAvatarUrl?: string | null,
+    newPhone?: string | null,
+  ) => {
     if (!user.value) return false;
     loading.value = true;
     error.value = "";
@@ -219,17 +231,23 @@ export const useAuthStore = defineStore("auth", () => {
       loading.value = false;
       return false;
     }
-    const finalAvatarUrl = newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
+    const finalAvatarUrl =
+      newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
+    const finalPhone = newPhone !== undefined ? newPhone : phone.value;
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: user.value.id,
       email: user.value.email,
       full_name: cleanName,
       avatar_url: finalAvatarUrl || null,
+      phone: finalPhone || null,
       role: role.value,
       is_premium: isPremium.value,
       premium_until: premiumUntil.value,
     });
-    if (!profileError) avatarUrl.value = finalAvatarUrl || null;
+    if (!profileError) {
+      avatarUrl.value = finalAvatarUrl || null;
+      phone.value = finalPhone || null;
+    }
     const { data, error: authError } = await supabase.auth.updateUser({
       data: { full_name: cleanName },
     });
@@ -362,6 +380,7 @@ export const useAuthStore = defineStore("auth", () => {
     avatarUrl,
     avatarFrame,
     ownedFrames,
+    phone,
     isLoggedIn,
     isTeacher,
     displayName,
