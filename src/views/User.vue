@@ -2,7 +2,7 @@
   <div
     class="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 text-slate-900 dark:text-white px-4 pt-6 pb-28 transition-colors duration-300">
     <div class="max-w-lg mx-auto">
-      <!-- Profile Header (read-only) -->
+      <!-- Profile Header -->
       <div class="text-center mb-10 mt-4">
         <div class="relative inline-flex justify-center mb-4 w-full">
           <AvatarFrame
@@ -118,14 +118,33 @@
         </p>
       </div>
 
-      <!-- Navigatsiya: Sozlamalar / Premium / Ilova haqida -->
+      <!-- Menu Items -->
       <div class="space-y-2 mb-6">
         <RouterLink
           to="/settings"
           class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left block">
           <span
             class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
-            <Settings :size="18" class="text-slate-400" /> Sozlamalar
+            <SettingsIcon :size="18" class="text-slate-400" /> Sozlamalar
+          </span>
+          <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
+        </RouterLink>
+        <RouterLink
+          to="/about"
+          class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left block">
+          <span
+            class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+            <Info :size="18" class="text-slate-400" /> Ilova haqida
+          </span>
+          <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
+        </RouterLink>
+
+        <RouterLink
+          to="/history"
+          class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left block">
+          <span
+            class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
+            <History :size="18" class="text-slate-400" /> Tarix
           </span>
           <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
         </RouterLink>
@@ -144,15 +163,23 @@
         </RouterLink>
 
         <RouterLink
-          to="/about"
+          to="/feedback"
           class="w-full flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition text-left block">
           <span
             class="font-bold text-slate-700 dark:text-white/80 flex items-center gap-3 text-sm">
-            <Info :size="18" class="text-slate-400" /> Ilova haqida
+            <MessageSquareHeart :size="18" class="text-slate-400" /> Fikr
+            bildirish
           </span>
           <ChevronRight :size="18" class="text-slate-300 dark:text-white/30" />
         </RouterLink>
       </div>
+
+      <!-- Sign Out -->
+      <button
+        @click="handleSignOut"
+        class="w-full py-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-500/20 transition flex items-center justify-center gap-2">
+        <LogOut :size="18" /> Chiqish
+      </button>
     </div>
 
     <!-- Onboarding Tooltip -->
@@ -167,13 +194,17 @@
 import { ref, computed, onMounted } from "vue";
 import {
   BarChart3,
+  LogOut,
   Crown,
-  Info,
   ChevronRight,
   Sparkles,
   Gem,
-  Settings,
+  Settings as SettingsIcon,
+  History,
+  MessageSquareHeart,
+  Info,
 } from "@lucide/vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/AuthStore";
 import { useCoinStore } from "../stores/CoinStore";
 import supabase from "../supabase";
@@ -181,6 +212,7 @@ import OnboardingTooltip from "../components/OnboardingTooltip.vue";
 import AvatarFrame from "../components/AvatarFrame.vue";
 import { FRAME_CATALOG, frameCost } from "../lib/frames";
 
+const router = useRouter();
 const authStore = useAuthStore();
 const coinStore = useCoinStore();
 const isPremium = computed(() => authStore.isPremium);
@@ -201,6 +233,7 @@ const selectFrame = async (key: string) => {
   const alreadyOwned = authStore.ownedFrames.includes(key);
   const cost = frameCost(key);
 
+  // Egalik qilingan (yoki bepul) ramkani kiyish — olmos yechilmaydi
   if (alreadyOwned || cost === 0) {
     const res = await authStore.setAvatarFrame(key);
     if (!res.ok)
@@ -210,6 +243,7 @@ const selectFrame = async (key: string) => {
     return;
   }
 
+  // Yangi ramka — sotib olish kerak
   if (coinStore.diamonds < cost) {
     frameError.value = `Bu ramka uchun ${cost} olmos kerak.`;
     return;
@@ -253,5 +287,10 @@ const loadStats = async () => {
       data.reduce((s: number, d: any) => s + d.percent, 0) / data.length,
     );
   }
+};
+
+const handleSignOut = async () => {
+  await authStore.signOut();
+  router.push("/login");
 };
 </script>

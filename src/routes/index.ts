@@ -124,6 +124,12 @@ const router = createRouter({
       meta: { hideSidebar: true, hideMobileNav: true },
     },
     {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/About.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
       path: "/profile/edit",
       name: "profile-edit",
       component: () => import("../views/ProfileEdit.vue"),
