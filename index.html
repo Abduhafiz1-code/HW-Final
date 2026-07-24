@@ -6,23 +6,25 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-		<title>Socrati — Uy vazifasi yordamchisi</title>
+		<title>Socrati — o'quv ilovasi va uy vazifasi yordamchisi</title>
 		<meta
 			name="description"
-			content="Socrati — o'quvchilar uchun uy vazifasi yordamchisi: AI yordamchi, testlar, mashqlar, o'yinlar va do'stlar bilan reyting." />
-		<meta name="theme-color" content="#f78574" />2.0.6
+			content="Socrati — o'quvchilar uchun o'quv ilovasi va uy vazifasi yordamchisi: AI yordamchi, testlar, mashqlar, o'yinlar va do'stlar bilan reyting." />
+		<meta
+			name="keywords"
+			content="Socrati, socrati, o'quv ilovasi, uy vazifasi yordamchisi, uy vazifasi, testlar, o'quvchilar uchun ilova, AI yordamchi, dars mashqlari" />
+		<meta name="author" content="Socrati" />
+		<meta name="robots" content="index, follow" />
+		<!-- TODO: sayt haqiqiy domenga joylashgach, YOUR_DOMAIN o'rniga
+		     asl manzilni yozing (masalan https://socrati.uz/) — canonical,
+		     og:url va JSON-LD'dagi "url" maydonlarini ham yangilang. -->
+		<link rel="canonical" href="https://YOUR_DOMAIN/" />
+		<meta name="theme-color" content="#7e14ff" />
 
 		<!-- Favicon -->
-		<link
-			rel="icon"
-			type="image/svg+xml"
-			href="/favicon.svg" />
-		<link
-			rel="apple-touch-icon"
-			href="/icons/apple-touch-icon.png" />
-		<link
-			rel="manifest"
-			href="/manifest.webmanifest" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
 		<!-- PWA / iOS "add to home screen" -->
 		<meta name="mobile-web-app-capable" content="yes" />
@@ -32,19 +34,41 @@
 
 		<!-- Open Graph / ijtimoiy tarmoqda ulashish -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://hw-final-alpha.vercel.app/" />
-		<meta property="og:title" content="Socrati — Uy vazifasi yordamchisi" />
+		<meta property="og:site_name" content="Socrati" />
+		<meta property="og:url" content="https://YOUR_DOMAIN/" />
+		<meta property="og:title" content="Socrati — o'quv ilovasi va uy vazifasi yordamchisi" />
 		<meta
 			property="og:description"
 			content="AI yordamchi, testlar, mashqlar, o'yinlar va do'stlar bilan reyting — bularning barchasi bitta ilovada." />
-		<meta property="og:image" content="https://hw-final-alpha.vercel.app/og-image.png" />
-<meta name="twitter:image" content="https://hw-final-alpha.vercel.app/og-image.png" />
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="Socrati — Uy vazifasi yordamchisi" />
+		<meta property="og:image" content="/icons/icon-512.png" />
+		<meta property="og:locale" content="uz_UZ" />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content="Socrati — o'quv ilovasi va uy vazifasi yordamchisi" />
 		<meta
 			name="twitter:description"
 			content="AI yordamchi, testlar, mashqlar, o'yinlar va do'stlar bilan reyting — bularning barchasi bitta ilovada." />
-		<!-- <meta name="twitter:image" content="https://hw-final-alpha.vercel.app/icons/icon-512.png" /> -->
+		<meta name="twitter:image" content="/icons/icon-512.png" />
+
+		<!-- Google va boshqa qidiruv tizimlari ilovani "Socrati" nomi va
+		     ta'lim/o'quv ilovasi sifatida to'g'ri tanishi uchun. Domenni
+		     joylashtirgach "url" maydonini ham yangilang. -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "Socrati",
+			"alternateName": "Socrati — o'quv ilovasi",
+			"applicationCategory": "EducationApplication",
+			"operatingSystem": "Web, Android, iOS",
+			"description": "Socrati — o'quvchilar uchun o'quv ilovasi va uy vazifasi yordamchisi: AI yordamchi, testlar, mashqlar, o'yinlar va do'stlar bilan reyting.",
+			"inLanguage": "uz",
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "UZS"
+			}
+		}
+		</script>
 	</head>
 	<body>
 		<div id="app"></div>

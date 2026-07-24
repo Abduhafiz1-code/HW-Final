@@ -17,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
   const avatarFrame = ref<string>("none");
   const ownedFrames = ref<string[]>(["none"]);
   const phone = ref<string | null>(null);
+  const notificationsEnabled = ref(true);
 
   const isLoggedIn = computed(() => !!user.value);
   const isTeacher = computed(() => role.value === "teacher");
@@ -161,18 +162,15 @@ export const useAuthStore = defineStore("auth", () => {
     if (!user.value) return;
     const { data } = await supabase
       .from("profiles")
-      .select(
-        "full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone",
-      )
+      .select("full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone, notifications_enabled")
       .eq("id", user.value.id)
       .maybeSingle();
 
     avatarUrl.value = data?.avatar_url ?? null;
     avatarFrame.value = data?.avatar_frame ?? "none";
-    ownedFrames.value = data?.owned_frames?.length
-      ? data.owned_frames
-      : ["none"];
+    ownedFrames.value = data?.owned_frames?.length ? data.owned_frames : ["none"];
     phone.value = data?.phone ?? null;
+    notificationsEnabled.value = data?.notifications_enabled ?? true;
 
     const meta = user.value.user_metadata || {};
     role.value = (data?.role || meta.role || "student") as
@@ -215,8 +213,6 @@ export const useAuthStore = defineStore("auth", () => {
   // (without touching your photo) silently wiped the avatar every time.
   // Now `newAvatarUrl` is optional: omit it to keep whatever avatar is
   // already saved; pass a value (or null) to explicitly change/remove it.
-  // `newPhone` follows the same optional pattern: omit to keep the current
-  // phone number, pass a value (or null) to explicitly change/clear it.
   const updateProfile = async (
     fullName: string,
     newAvatarUrl?: string | null,
@@ -231,8 +227,7 @@ export const useAuthStore = defineStore("auth", () => {
       loading.value = false;
       return false;
     }
-    const finalAvatarUrl =
-      newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
+    const finalAvatarUrl = newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
     const finalPhone = newPhone !== undefined ? newPhone : phone.value;
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: user.value.id,
@@ -258,6 +253,53 @@ export const useAuthStore = defineStore("auth", () => {
     await syncProfile();
     loading.value = false;
     return !profileError && !authError;
+  };
+
+  // Email o'zgartirish — Supabase yangi manzilga tasdiqlash xati yuboradi;
+  // haqiqiy o'zgarish faqat foydalanuvchi o'sha xatdagi havolani bosgach
+  // amalga oshadi (xavfsizlik uchun standart Supabase oqimi).
+  const updateEmail = async (newEmail: string) => {
+    const cleanEmail = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return { ok: false, error: "Email manzil noto'g'ri." };
+    }
+    const { error: err } = await supabase.auth.updateUser({ email: cleanEmail });
+    return { ok: !err, error: err?.message };
+  };
+
+  const setNotificationsEnabled = async (enabled: boolean) => {
+    if (!user.value) return false;
+    const { error: err } = await supabase
+      .from("profiles")
+      .update({ notifications_enabled: enabled })
+      .eq("id", user.value.id);
+    if (!err) notificationsEnabled.value = enabled;
+    return !err;
+  };
+
+  // Foydalanuvchining test/mashq/o'yin tarixini butunlay tozalash.
+  // Tanga/olmos/premium/ramkalarga tegmaydi — faqat History sahifasidagi
+  // yozuvlar o'chadi.
+  const clearHistory = async () => {
+    if (!user.value) return false;
+    const uid = user.value.id;
+    const [a, b, c] = await Promise.all([
+      supabase.from("test_results").delete().eq("user_id", uid),
+      supabase.from("practice_results").delete().eq("user_id", uid),
+      supabase.from("game_results").delete().eq("user_id", uid),
+    ]);
+    return !a.error && !b.error && !c.error;
+  };
+
+  // Accountni butunlay o'chirish — qaytarib bo'lmaydigan amal.
+  // SUPABASE_UPDATE_6.sql'dagi delete_own_account() RPC orqali auth.users
+  // qatori o'chadi, qolgan hamma narsa (profiles/coins/tarix/...)
+  // ON DELETE CASCADE bilan avtomatik o'chadi.
+  const deleteAccount = async () => {
+    const { error: err } = await supabase.rpc("delete_own_account");
+    if (err) return { ok: false, error: err.message };
+    await signOut();
+    return { ok: true };
   };
 
   // Faqat allaqachon egalik qilingan (yoki bepul) ramkani kiyish uchun —
@@ -381,6 +423,7 @@ export const useAuthStore = defineStore("auth", () => {
     avatarFrame,
     ownedFrames,
     phone,
+    notificationsEnabled,
     isLoggedIn,
     isTeacher,
     displayName,
@@ -393,6 +436,10 @@ export const useAuthStore = defineStore("auth", () => {
     signIn,
     signOut,
     updateProfile,
+    updateEmail,
+    setNotificationsEnabled,
+    clearHistory,
+    deleteAccount,
     setAvatarFrame,
     unlockFrame,
     incrementAIUsage,

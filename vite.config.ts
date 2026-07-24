@@ -20,19 +20,20 @@ export default defineConfig({
         enabled: true,
         type: "module",
       },
-      includeAssets: ["favicon.svg", "icons.svg"],
+      includeAssets: ["favicon.svg", "favicon.ico"],
       manifest: {
-        name: "Socrati — HomeWork Helper",
+        name: "Socrati — o'quv va uy vazifasi yordamchisi",
         short_name: "Socrati",
         description:
           "O'quvchilar uchun uy vazifasi yordamchisi: test, mashq, AI yordamchi va reyting tizimi",
-        theme_color: "#863bff",
+        theme_color: "#7e14ff",
         background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
         scope: "/",
         orientation: "portrait",
         lang: "uz",
+        categories: ["education", "productivity"],
         icons: [
           {
             src: "/icons/icon-192.png",

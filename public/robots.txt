@@ -1,0 +1,7 @@
+# Socrati — barcha qidiruv tizimlariga ruxsat.
+# Sayt haqiqiy domenga joylashgach, quyidagi sitemap manzilini
+# https://YOUR_DOMAIN/sitemap.xml ko'rinishida yangilang.
+User-agent: *
+Allow: /
+
+Sitemap: https://YOUR_DOMAIN/sitemap.xml

@@ -56,7 +56,7 @@ const router = createRouter({
       path: "/translate",
       name: "translate",
       component: () => import("../views/Translate.vue"),
-      meta: { hideSidebar: false, hideMobileNav: true },
+      meta: { hideSidebar: false, hideMobileNav: false },
     },
     {
       path: "/premium",
@@ -124,9 +124,9 @@ const router = createRouter({
       meta: { hideSidebar: true, hideMobileNav: true },
     },
     {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/About.vue"),
+      path: "/profile/edit",
+      name: "profile-edit",
+      component: () => import("../views/ProfileEdit.vue"),
       meta: { hideSidebar: true, hideMobileNav: true },
     },
   ],

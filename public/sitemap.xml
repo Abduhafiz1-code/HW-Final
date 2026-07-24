@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Socrati — sitemap. "YOUR_DOMAIN" o'rniga saytning haqiqiy domenini yozing
+  (index.html, robots.txt bilan bir xil domen bo'lishi kerak).
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://YOUR_DOMAIN/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
