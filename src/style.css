@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Sahifa yuqorisida tasodifiy qora chiziq/chizg'ich artefaktining oldini oladi
+   (scrolled fixed elementlar, transform'langan konteynerlar yoki viewport
+   overflow'i chetki piksellarni kesib qolishi). */
+html,
+body {
+  overflow-x: clip;
+  background: #f7f9fc;
+}
+html.dark body {
+  background: #0f172a;
+}
+
 html.dark {
   color-scheme: dark;
 }
@@ -110,6 +122,33 @@ html {
   scroll-behavior: smooth;
 }
 
+/* === Performance: arzon animatsiyalar ===
+   Faqat transform/opacity animatsiyalanadi (GPU), reflow qo'zgatmaydi.
+   Motionni kamaytirishni xohlaydigan foydalanuvchilar uchun ham hurmat. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobil qurilmalarda scrollash silliq va tez bo'lishi uchun */
+body {
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeSpeed;
+}
+
+/* Uzun ro'yxatlarda kontent-kenglik o'zgarishini oldini olish (layout shift kamayadi) */
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 /* === Keyframe animations === */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
@@ -197,4 +236,24 @@ html.dark .skeleton {
 
 .toast-exit {
   animation: slideOutFade 0.3s ease-in forwards;
+}
+
+/* === Shared micro-animations (ilova bo'ylab ishlaydi — quiz kartalar, modallar) === */
+@keyframes pop {
+  0% { transform: scale(0.9); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.animate-pop {
+  animation: pop 0.28s ease-out;
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 1.6s ease-in-out infinite;
 }

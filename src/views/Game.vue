@@ -23,6 +23,8 @@
 
       <!-- ============ SETUP SCREEN ============ -->
       <div v-if="screen === 'setup'" class="space-y-4">
+        <!-- 🆕 Global musobaqa: Hisob Blitz (butun dunyo bilan bellashuv) -->
+        <GameBlitz />
         <!-- Mode selector -->
         <div class="bg-white rounded-3xl border border-slate-200 p-2 shadow-sm">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -48,6 +50,109 @@
             class="text-xs text-slate-500 text-center mt-2 px-2 transition-all">
             {{ currentMode.hint }}
           </p>
+        </div>
+
+        <!-- Sozlamalar: fan, til juftligi, so'z soni -->
+        <div
+          v-if="gameMode !== 'battle'"
+          class="bg-white rounded-3xl border border-slate-200 p-4 shadow-sm">
+          <button
+            @click="showSettings = !showSettings"
+            class="w-full flex items-center justify-between gap-2">
+            <span
+              class="text-sm font-black text-slate-800 flex items-center gap-1.5 flex-shrink-0">
+              <Settings2 :size="16" class="text-orange-500" /> Sozlamalar
+            </span>
+            <span
+              class="text-[11px] text-slate-400 font-semibold flex items-center gap-1 min-w-0 truncate">
+              <span class="truncate">{{ subject }} · {{ fromLangName }} → {{ toLangName }} · {{ wordCount }} so'z</span>
+              <ChevronDown
+                :size="14"
+                class="flex-shrink-0 transition-transform"
+                :class="showSettings && 'rotate-180'" />
+            </span>
+          </button>
+
+          <div v-if="showSettings" class="mt-4 space-y-4 animate-fade-in-up">
+            <!-- Fan tanlash + yangi fan qo'shish -->
+            <div>
+              <p class="text-xs font-bold text-slate-500 mb-1.5">Fan</p>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="s in subjects"
+                  :key="s"
+                  @click="subject = s"
+                  :class="
+                    subject === s
+                      ? 'border-orange-400 bg-orange-50 text-orange-600 scale-105'
+                      : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                  "
+                  class="px-3 py-1.5 rounded-xl border-2 text-xs font-bold transition-all">
+                  {{ s }}
+                </button>
+              </div>
+              <!-- Fan yo'q bo'lsa — o'zi qo'shadi -->
+              <div class="flex gap-2 mt-2">
+                <input
+                  v-model="newSubject"
+                  @keydown.enter="addSubject"
+                  placeholder="Kerakli fan yo'qmi? Nomini yozib qo'shing..."
+                  class="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition" />
+                <button
+                  @click="addSubject"
+                  :disabled="!newSubject.trim()"
+                  class="flex-shrink-0 px-3 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-200 text-xs font-black hover:bg-orange-100 active:scale-95 transition disabled:opacity-50 flex items-center gap-1">
+                  <Plus :size="14" /> Qo'shish
+                </button>
+              </div>
+            </div>
+
+            <!-- Til juftligi -->
+            <div>
+              <p class="text-xs font-bold text-slate-500 mb-1.5">
+                Qaysi tildan qaysi tilga
+              </p>
+              <div class="flex items-center gap-2">
+                <select
+                  v-model="fromLang"
+                  class="flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-400 transition">
+                  <option v-for="l in GAME_LANGS" :key="l.code" :value="l.code">
+                    {{ l.name }}
+                  </option>
+                </select>
+                <ArrowLeftRight :size="16" class="text-slate-400 flex-shrink-0" />
+                <select
+                  v-model="toLang"
+                  class="flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-50 text-sm font-bold text-slate-800 focus:outline-none focus:border-indigo-400 transition">
+                  <option v-for="l in GAME_LANGS" :key="l.code" :value="l.code">
+                    {{ l.name }}
+                  </option>
+                </select>
+              </div>
+              <p v-if="fromLang === toLang" class="text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                <X :size="12" /> Ikkala til bir xil — boshqa til tanlang
+              </p>
+            </div>
+
+            <!-- So'zlar soni -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <p class="text-xs font-bold text-slate-500">So'zlar soni</p>
+                <span class="text-xs font-black text-orange-500">{{ wordCount }} ta</span>
+              </div>
+              <input
+                v-model.number="wordCount"
+                type="range"
+                min="4"
+                max="20"
+                step="1"
+                class="w-full accent-orange-500 cursor-pointer" />
+              <div class="flex justify-between text-[10px] text-slate-400 font-bold mt-0.5">
+                <span>4</span>
+                <span>20</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Word list builder (memory / quiz / type modes) -->
@@ -92,6 +197,12 @@
             class="w-full py-2 rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-sm font-semibold hover:border-orange-300 hover:text-orange-500 active:scale-[0.98] transition mb-4">
             + So'z qo'shish
           </button>
+
+          <Transition name="fade">
+            <p v-if="wordGenError" class="text-xs text-red-500 font-bold bg-red-50 dark:bg-red-900/20 rounded-xl px-3 py-2 mb-3 flex items-center gap-1.5">
+              <X :size="13" /> {{ wordGenError }}
+            </p>
+          </Transition>
 
           <div class="mb-4">
             <p
@@ -545,7 +656,7 @@
                   </p>
                 </div>
                 <div
-                  class="rounded-2xl bg-white/90 px-3 py-2 text-right shadow-sm ring-1 ring-black/5">
+                  class="rounded-2xl bg-white/90 px-3 py-2 text-right shadow-sm ring-1 ring-black/5 relative">
                   <p
                     class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Hisob
@@ -557,6 +668,19 @@
                     "
                     >{{ battleScores[team] }}</span
                   >
+                  <!-- Ball o'zgarganda uchib chiqadigan +20 / -10 -->
+                  <Transition name="scorepop">
+                    <span
+                      v-if="scoreFlash.team === team && scoreFlash.delta"
+                      class="absolute -top-2 left-1/2 -translate-x-1/2 text-lg font-black px-2 py-0.5 rounded-lg shadow-lg"
+                      :class="[
+                        scoreFlash.delta > 0
+                          ? 'text-green-600 bg-green-50'
+                          : 'text-red-500 bg-red-50',
+                      ]">
+                      {{ scoreFlash.delta > 0 ? `+${scoreFlash.delta}` : scoreFlash.delta }}
+                    </span>
+                  </Transition>
                 </div>
               </div>
               <div
@@ -629,12 +753,20 @@
                   </span>
                   <div class="text-right">
                     <span
-                      class="flex items-center justify-end gap-1 text-xs font-black text-slate-600"
-                      ><Clock :size="14" class="text-orange-500" />
+                      class="flex items-center justify-end gap-1 text-xs font-black tabular-nums"
+                      :class="battleTimer <= 5 ? 'text-red-500 animate-pulse' : 'text-slate-600'"
+                      ><Clock :size="14" :class="battleTimer <= 5 ? 'text-red-500' : 'text-orange-500'" />
                       {{ battleTimer }}s</span
                     ><span class="text-[10px] font-semibold text-slate-400"
                       >qolgan vaqt</span
                     >
+                    <!-- Vaqt tugayotganda pulsli qizil chiziq -->
+                    <div class="mt-1 h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all duration-1000 ease-linear"
+                        :class="battleTimer <= 5 ? 'bg-red-500' : 'bg-orange-400'"
+                        :style="{ width: `${(battleTimer / 30) * 100}%` }"></div>
+                    </div>
                   </div>
                 </div>
                 <div
@@ -695,6 +827,24 @@
         <div
           v-else-if="battleScreen === 'over'"
           class="text-center py-6 animate-pop">
+          <!-- Animatsiyali jamoa jangi yakuni -->
+          <CelebrationOverlay :show="battleCelebrate && battleScreen === 'over'"
+            :variant="
+              battleScores.team1 === battleScores.team2
+                ? 'tie'
+                : battleScores.team1 > battleScores.team2
+                  ? 'win'
+                  : 'win'
+            "
+            :title="battleWinnerText"
+            :subtitle="`1-guruh ${battleScores.team1} — 2-guruh ${battleScores.team2}`"
+            :stats="[
+              { label: '1-guruh', value: battleScores.team1, colorClass: 'text-blue-600' },
+              { label: '2-guruh', value: battleScores.team2, colorClass: 'text-rose-600' },
+            ]"
+            :count-up-to="Math.max(battleScores.team1, battleScores.team2)"
+            primary-label="Yangi jang"
+            @primary="exitBattle" />
           <div
             class="w-16 h-16 rounded-2xl bg-yellow-50 flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
             <Trophy :size="34" class="text-yellow-500" />
@@ -730,10 +880,27 @@
         </div>
       </div>
 
-      <!-- ============ WIN OVERLAY ============ -->
+      <!-- ============ WIN OVERLAY (memory/quiz/type) ============ -->
+      <!-- Animatsiyali CelebrationOverlay — konfeti, count-up hisob va stat chips -->
+      <CelebrationOverlay :show="gameWon && !oldWinOverlay"
+        :variant="'win'"
+        :title="'Zo\'r! 🎉'"
+        :subtitle="winSummary"
+        :count-up-to="gameRewardCoins"
+        :count-suffix="' tanga'"
+        :stats="[
+          { label: 'Tanga', value: `+${gameRewardCoins}`, colorClass: 'text-orange-500' },
+          { label: 'Progress', value: '+100', colorClass: 'text-green-600' },
+        ]"
+        :share-text="`So'z o'yinida ${gameRewardCoins} tanga yutdim! 🎮 Sen ham o'ynab ko'r!`"
+        primary-label="Qayta o'ynash"
+        secondary-label="Yangi so'zlar"
+        @primary="resetGame"
+        @secondary="backToSetup" />
+      <!-- Eski overlay (Fallback faqat celebration o'chirilganda) -->
       <Transition name="fade">
         <div
-          v-if="gameWon"
+          v-if="gameWon && oldWinOverlay"
           class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4 overflow-hidden">
           <span
             v-for="n in 16"
@@ -788,6 +955,7 @@ import {
   computed,
   nextTick,
   onUnmounted,
+  watch,
   h,
   defineComponent,
   type PropType,
@@ -797,6 +965,9 @@ import supabase from "../supabase";
 import { askAIJson } from "../lib/ai";
 import { saveNotification } from "../lib/Notification";
 import OnboardingTooltip from "../components/OnboardingTooltip.vue";
+import CelebrationOverlay from "../components/CelebrationOverlay.vue";
+import GameBlitz from "../components/GameBlitz.vue";
+import { playDing, playBuzz, playClick, speak } from "../lib/sound";
 import {
   Dices,
   Bot,
@@ -824,6 +995,10 @@ import {
   Copy,
   LogIn,
   Clock,
+  Settings2,
+  ChevronDown,
+  ArrowLeftRight,
+  Plus,
 } from "@lucide/vue";
 const coinStore = useCoinStore();
 
@@ -968,14 +1143,84 @@ const validPairs = computed(() =>
   wordPairs.value.filter((p) => p.word.trim() && p.translation.trim()),
 );
 
+const wordGenError = ref("");
+
+/* ---------------- Sozlamalar: fan, tillar, so'z soni ---------------- */
+const GAME_LANGS = [
+  { code: "en", name: "English" },
+  { code: "uz", name: "O'zbek" },
+  { code: "ru", name: "Rus tili" },
+  { code: "tr", name: "Turk tili" },
+  { code: "de", name: "Nemis tili" },
+  { code: "fr", name: "Fransuz tili" },
+  { code: "es", name: "Ispan tili" },
+  { code: "ar", name: "Arab tili" },
+  { code: "zh", name: "Xitoy tili" },
+  { code: "ko", name: "Koreys tili" },
+];
+const langName = (c: string) => GAME_LANGS.find((l) => l.code === c)?.name || c;
+const fromLangName = computed(() => langName(fromLang.value));
+const toLangName = computed(() => langName(toLang.value));
+
+const showSettings = ref(false);
+const fromLang = ref(localStorage.getItem("game_fromLang") || "en");
+const toLang = ref(localStorage.getItem("game_toLang") || "uz");
+const wordCount = ref(Number(localStorage.getItem("game_wordCount")) || 10);
+
+const DEFAULT_SUBJECTS = [
+  "Ingliz tili",
+  "Rus tili",
+  "Matematika",
+  "Tarix",
+  "Geografiya",
+  "Biologiya",
+  "Umumiy",
+];
+const customSubjects = ref<string[]>(
+  (() => {
+    try {
+      return JSON.parse(localStorage.getItem("game_customSubjects") || "[]");
+    } catch {
+      return [];
+    }
+  })(),
+);
+const subjects = computed(() => [
+  ...DEFAULT_SUBJECTS,
+  ...customSubjects.value,
+]);
+const subject = ref(localStorage.getItem("game_subject") || "Ingliz tili");
+const newSubject = ref("");
+
+const addSubject = () => {
+  const s = newSubject.value.trim();
+  if (!s || subjects.value.includes(s)) return;
+  customSubjects.value.push(s);
+  localStorage.setItem(
+    "game_customSubjects",
+    JSON.stringify(customSubjects.value),
+  );
+  subject.value = s;
+  newSubject.value = "";
+};
+
+// Sozlamalarni avtomatik saqlash — keyingi kirishda eslab qoladi
+watch([fromLang, toLang, wordCount, subject], () => {
+  localStorage.setItem("game_fromLang", fromLang.value);
+  localStorage.setItem("game_toLang", toLang.value);
+  localStorage.setItem("game_wordCount", String(wordCount.value));
+  localStorage.setItem("game_subject", subject.value);
+});
+
 const generateWords = async () => {
+  wordGenError.value = "";
   if (!aiTopic.value.trim()) {
-    alert("Iltimos, AI uchun mavzu kiriting.");
+    wordGenError.value = "Iltimos, AI uchun mavzu kiriting (masalan: hayvonlar).";
     return;
   }
   aiLoading.value = true;
   const pairs = await askAIJson<WordPair[]>(
-    `"${aiTopic.value}" mavzusida 40 ta so'z va o'zbekcha tarjimasini JSON: [{"word":"...","translation":"..."}]. Boshqa hech narsa yozma.`,
+    `"${aiTopic.value}" mavzusida ${subject.value} faniga tegishli ${wordCount.value} ta ${fromLangName.value} tilidagi so'z va ${toLangName.value} tilidagi tarjimasi JSON: [{"word":"...","translation":"..."}]. Faqat ${fromLangName.value}→${toLangName.value} juftliklari. Boshqa hech narsa yozma.`,
     [],
   );
   const cleanedPairs = (Array.isArray(pairs) ? pairs : [])
@@ -987,11 +1232,11 @@ const generateWords = async () => {
         p.word.trim() &&
         p.translation.trim(),
     )
-    .slice(0, 12) as WordPair[];
+    .slice(0, wordCount.value) as WordPair[];
   if (cleanedPairs.length) {
     wordPairs.value = cleanedPairs;
   } else {
-    alert("AI xatosi. Qayta urinib ko'ring.");
+    wordGenError.value = "AI so'z tuza olmadi. Boshqa mavzu bilan qayta urinib ko'ring.";
   }
   aiLoading.value = false;
 };
@@ -1002,6 +1247,8 @@ const formatTime = (s: number) =>
     .padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
 /* completion / rewards shared helper */
+// O'yin yakunida HAQIQIY mukofot beriladi: progress + tanga.
+// Mukofot miqdori o'yin natijasiga bog'liq (bu o'yinlarni mazmunli qiladi).
 const awardCompletion = async (
   summary: string,
   notifTitle: string,
@@ -1025,22 +1272,45 @@ const awardCompletion = async (
 
   await coinStore.fetchCoins();
   await coinStore.addProgress(100);
+
+  // Mukofot: memory — tezlikka qarab; quiz/type — to'g'ri javoblar foiziga qarab.
+  const coinsReward = gameRewardCoins.value;
+  if (user && coinsReward > 0) {
+    const { data: row } = await supabase
+      .from("coins")
+      .select("coins")
+      .eq("user_id", user.id)
+      .single();
+    const newCoins = (row?.coins ?? 0) + coinsReward;
+    await supabase.from("coins").update({ coins: newCoins }).eq("user_id", user.id);
+    coinStore.coins = newCoins;
+    winSummary.value = `${summary} (+${coinsReward} tanga!)`;
+  }
+
   if (!user) return;
 
   await saveNotification(
     user.id,
     notifTitle,
-    notifDesc,
-    "🃏",
-    "100% progress",
+    coinsReward > 0 ? `${notifDesc} — +${coinsReward} tanga` : notifDesc,
+    "Cards",
+    coinsReward > 0 ? `+${coinsReward} tanga` : "100% progress",
     "bg-purple-50",
     "text-purple-500",
     "bg-purple-50 text-purple-600",
   );
 };
 
+// Yakunlanganda hisoblanadi: memory uchun urinish tejamkorligi, quiz/type uchun aniqlik
+const gameRewardCoins = ref(0);
+const computeMemoryReward = (pairs: number, attempts: number) => {
+  const efficiency = pairs / Math.max(attempts, 1); // 0.5 = mukammal
+  return Math.max(5, Math.min(25, Math.round(efficiency * 40)));
+};
+
 const startGame = () => {
   gameWon.value = false;
+  gameRewardCoins.value = 0;
   if (gameMode.value === "memory") startMemory();
   else if (gameMode.value === "quiz") startQuiz();
   else if (gameMode.value === "type") startType();
@@ -1054,8 +1324,11 @@ const resetGame = () => {
 const backToSetup = () => {
   clearAllTimers();
   gameWon.value = false;
+  oldWinOverlay.value = false;
   screen.value = "setup";
 };
+// Eski win overlay faqat fallback sifatida (jangovar celebration bilan ustma-ust tushmasin)
+const oldWinOverlay = ref(false);
 let memTimer: any, typeTimer: any;
 const clearAllTimers = () => {
   clearInterval(memTimer);
@@ -1106,6 +1379,9 @@ const startMemory = () => {
 const flipCard = async (card: Card) => {
   if (card.matched || card.flipped || flippedCards.value.length >= 2) return;
   card.flipped = true;
+  playClick(); // 🔊 karta ochilishi
+  // 🔊 So'zni o'qib berish (talaffuz) — word kartasida
+  if (card.type === "word") speak(card.text || "", "en");
   flippedCards.value.push(card);
   if (flippedCards.value.length === 2) {
     attempts.value++;
@@ -1113,9 +1389,11 @@ const flipCard = async (card: Card) => {
     if (a.pairId === b.pairId && a.type !== b.type) {
       a.matched = b.matched = true;
       matchedCount.value++;
+      playDing(); // 🔊 juftlik topildi
       flippedCards.value = [];
       if (matchedCount.value === validPairs.value.length) {
         clearInterval(memTimer);
+        gameRewardCoins.value = computeMemoryReward(validPairs.value.length, attempts.value);
         await awardCompletion(
           `${validPairs.value.length} juft so'z — ${attempts.value} urinishda, ${formatTime(elapsed.value)} da yakunladingiz!`,
           "So'z o'yini yakunlandi!",
@@ -1128,6 +1406,7 @@ const flipCard = async (card: Card) => {
         );
       }
     } else {
+      playBuzz(); // 🔊 juftlik mos kelmadi
       setTimeout(() => {
         a.flipped = b.flipped = false;
         flippedCards.value = [];
@@ -1175,14 +1454,17 @@ const answerQuiz = async (opt: string) => {
   if (opt === quizCurrent.value.translation) {
     quizScore.value++;
     quizStreak.value++;
+    playDing();
   } else {
     quizStreak.value = 0;
+    playBuzz();
   }
   await new Promise((r) => setTimeout(r, 700));
   if (quizIndex.value + 1 < quizQueue.value.length) {
     quizIndex.value++;
     loadQuizQuestion();
   } else {
+    gameRewardCoins.value = Math.max(5, Math.round((quizScore.value / quizQueue.value.length) * 20));
     await awardCompletion(
       `${quizQueue.value.length} ta savoldan ${quizScore.value} tasiga to'g'ri javob berdingiz!`,
       "Tezkor tanlov yakunlandi!",
@@ -1239,6 +1521,7 @@ const advanceType = async () => {
     nextTick(() => typeInput.value?.focus());
   } else {
     clearInterval(typeTimer);
+    gameRewardCoins.value = Math.max(5, Math.round(((typeQueue.value.length - typeMistakes.value) / typeQueue.value.length) * 20));
     await awardCompletion(
       `${typeQueue.value.length} ta so'z, ${typeMistakes.value} ta xato, ${formatTime(typeElapsed.value)} da yakunladingiz!`,
       "Yozib topish yakunlandi!",
@@ -1253,6 +1536,8 @@ const submitType = () => {
     typeAnswer.value.trim().toLowerCase() ===
     typeCurrent.value.translation.trim().toLowerCase();
   typeStatus.value = ok ? "correct" : "wrong";
+  if (ok) playDing();
+  else playBuzz();
   if (!ok) typeMistakes.value++;
   setTimeout(advanceType, ok ? 500 : 800);
 };
@@ -1333,6 +1618,19 @@ const battleVotes = ref<Record<number, number>>({});
 const battleVotedPlayers = ref<Set<string>>(new Set());
 const battleTimer = ref(30);
 let battleTimerInterval: any = null;
+// Jamoa hisobi o'zgarganda uchib chiqadigan +20/-10 belgisi
+const scoreFlash = ref<{ team: BattleTeam | null; delta: number }>({
+  team: null,
+  delta: 0,
+});
+let scoreFlashTimeout: any = null;
+const flashScore = (team: BattleTeam, delta: number) => {
+  scoreFlash.value = { team, delta };
+  clearTimeout(scoreFlashTimeout);
+  scoreFlashTimeout = setTimeout(() => (scoreFlash.value = { team: null, delta: 0 }), 1100);
+};
+// Jang yakunlari uchun animatsiyali overlay
+const battleCelebrate = ref(false);
 const battleRevealResult = ref<{
   correct: boolean;
   chosen: number;
@@ -1705,6 +2003,7 @@ const openBattleCard = (team: BattleTeam, idx: number) => {
   card.opened = true;
   if (card.kind === "bomb") {
     battleScores.value[team] -= 10;
+    flashScore(team, -10);
     triggerBombFlash(team);
     if (battleConnMode.value === "online")
       sendBattleEvent({
@@ -1766,7 +2065,10 @@ const resolveBattleCard = () => {
     chosen = top[Math.floor(Math.random() * top.length)];
   }
   const correct = chosen === card.q.correctIndex;
-  if (correct) battleScores.value[team] += 20;
+  if (correct) {
+    battleScores.value[team] += 20;
+    flashScore(team, 20);
+  }
   battleRevealResult.value = {
     correct,
     chosen,
@@ -1801,6 +2103,7 @@ const checkBattleEnd = async () => {
   if (!battleAllOpened()) return;
   if (battleConnMode.value === "online" && battleRole.value !== "host") return;
   battleScreen.value = "over";
+  battleCelebrate.value = true; // animatsiyali yakun ekrani
   if (battleConnMode.value === "online") sendBattleEvent({ type: "game_over" });
   await coinStore.fetchCoins();
   await coinStore.addProgress(20); // host reward — swap to coinStore.addCoins(20) if that method exists
@@ -1813,11 +2116,13 @@ const checkBattleEndForNonHost = () => {
     battleAllOpened()
   ) {
     battleScreen.value = "over";
+    battleCelebrate.value = true;
   }
 };
 
 const exitBattle = () => {
   clearInterval(battleTimerInterval);
+  battleCelebrate.value = false;
   battleChannel.value?.unsubscribe?.();
   battleChannel.value = null;
   battleScreen.value = "config";

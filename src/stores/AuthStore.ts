@@ -2,8 +2,6 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import supabase from "../supabase";
 
-const TEACHER_SECRET = "Socrati2026";
-
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<any>(null);
   const role = ref<"student" | "teacher">("student");
@@ -14,6 +12,8 @@ export const useAuthStore = defineStore("auth", () => {
   const coopUsageCount = ref(0);
   const premiumUntil = ref<string | null>(null);
   const avatarUrl = ref<string | null>(null);
+  // Profil orqa fon rasmi (User sahifasi kartochkasi uchun)
+  const profileBgUrl = ref<string | null>(null);
   const avatarFrame = ref<string>("none");
   const ownedFrames = ref<string[]>(["none"]);
   const phone = ref<string | null>(null);
@@ -64,7 +64,6 @@ export const useAuthStore = defineStore("auth", () => {
     password: string,
     fullName: string,
     selectedRole: "student" | "teacher",
-    teacherCode?: string,
   ) => {
     loading.value = true;
     error.value = "";
@@ -90,11 +89,8 @@ export const useAuthStore = defineStore("auth", () => {
       loading.value = false;
       return false;
     }
-    if (selectedRole === "teacher" && teacherCode !== TEACHER_SECRET) {
-      error.value = "Teacher kodi noto'g'ri!";
-      loading.value = false;
-      return false;
-    }
+    // O'qituvchi bo'lish HULKORIY: kod yo'q — xohlagan foydalanuvchi
+    // o'qituvchi sifatida ro'yxatdan o'tadi.
     const { data, error: err } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
@@ -160,15 +156,38 @@ export const useAuthStore = defineStore("auth", () => {
   // ✅ TUZATILDI: isPremium endi faqat BITTA, aniq mantiq bilan hisoblanadi
   const syncProfile = async () => {
     if (!user.value) return;
-    const { data } = await supabase
+    let { data, error: profileQueryError } = await supabase
       .from("profiles")
-      .select("full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone, notifications_enabled")
+      .select(
+        "full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone, notifications_enabled, profile_bg_url",
+      )
       .eq("id", user.value.id)
       .maybeSingle();
 
+    // Older projects may not have run SUPABASE_UPDATE_9 yet. Keep the
+    // profile and avatar usable while the optional background column is absent.
+    if (profileQueryError?.code === "42703") {
+      const fallback = await supabase
+        .from("profiles")
+        .select(
+          "full_name, role, is_premium, premium_until, avatar_url, avatar_frame, owned_frames, phone, notifications_enabled",
+        )
+        .eq("id", user.value.id)
+        .maybeSingle();
+      data = fallback.data as typeof data;
+      profileQueryError = fallback.error;
+    }
+
+    if (profileQueryError) {
+      console.error("Profil ma'lumotlari yuklanmadi:", profileQueryError);
+    }
+
     avatarUrl.value = data?.avatar_url ?? null;
+    profileBgUrl.value = data?.profile_bg_url ?? null;
     avatarFrame.value = data?.avatar_frame ?? "none";
-    ownedFrames.value = data?.owned_frames?.length ? data.owned_frames : ["none"];
+    ownedFrames.value = data?.owned_frames?.length
+      ? data.owned_frames
+      : ["none"];
     phone.value = data?.phone ?? null;
     notificationsEnabled.value = data?.notifications_enabled ?? true;
 
@@ -227,7 +246,8 @@ export const useAuthStore = defineStore("auth", () => {
       loading.value = false;
       return false;
     }
-    const finalAvatarUrl = newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
+    const finalAvatarUrl =
+      newAvatarUrl !== undefined ? newAvatarUrl : avatarUrl.value;
     const finalPhone = newPhone !== undefined ? newPhone : phone.value;
     const { error: profileError } = await supabase.from("profiles").upsert({
       id: user.value.id,
@@ -263,7 +283,9 @@ export const useAuthStore = defineStore("auth", () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return { ok: false, error: "Email manzil noto'g'ri." };
     }
-    const { error: err } = await supabase.auth.updateUser({ email: cleanEmail });
+    const { error: err } = await supabase.auth.updateUser({
+      email: cleanEmail,
+    });
     return { ok: !err, error: err?.message };
   };
 
@@ -331,6 +353,23 @@ export const useAuthStore = defineStore("auth", () => {
       avatarFrame.value = frame;
     }
     return { ok: !err, error: err?.message };
+  };
+
+  // Profil orqa fon rasmini saqlash/o'chirish
+  const setProfileBg = async (url: string | null) => {
+    if (!user.value) return { ok: false, error: "Tizimga kirilmagan." };
+    const { error: err } = await supabase
+      .from("profiles")
+      .update({ profile_bg_url: url })
+      .eq("id", user.value.id);
+    if (!err) profileBgUrl.value = url;
+    return {
+      ok: !err,
+      error:
+        err?.code === "42703"
+          ? "Profil foni uchun SUPABASE_UPDATE_9.sql migrationini ishga tushiring."
+          : err?.message,
+    };
   };
 
   const incrementAIUsage = async () => {
@@ -441,6 +480,8 @@ export const useAuthStore = defineStore("auth", () => {
     clearHistory,
     deleteAccount,
     setAvatarFrame,
+    setProfileBg,
+    profileBgUrl,
     unlockFrame,
     incrementAIUsage,
     incrementCoopUsage,

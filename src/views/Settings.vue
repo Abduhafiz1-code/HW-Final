@@ -54,6 +54,17 @@
             <div class="w-5 h-5 rounded-full bg-white shadow"></div>
           </div>
         </button>
+
+        <button @click="toggleSound" class="settings-item w-full">
+          <span class="settings-label">
+            <VolumeX v-if="!soundOn" :size="18" class="text-slate-400" />
+            <Volume2 v-else :size="18" class="text-orange-500" />
+            Ovoz effektlari
+          </span>
+          <div class="w-10 h-6 rounded-full transition flex items-center px-0.5" :class="soundOn ? 'bg-orange-500 justify-end' : 'bg-slate-200 dark:bg-slate-700 justify-start'">
+            <div class="w-5 h-5 rounded-full bg-white shadow"></div>
+          </div>
+        </button>
       </div>
 
       <!-- Ma'lumotlar -->
@@ -163,8 +174,10 @@ import { useRouter } from 'vue-router';
 import {
   ArrowLeft, User, KeyRound, ChevronRight, ChevronDown, Moon, Sun, Bell,
   Download, Trash2, MessageSquareHeart, Info, UserX, X, Mail, Loader,
+  Volume2, VolumeX,
 } from '@lucide/vue';
 import { useAuthStore } from '../stores/AuthStore';
+import { isSoundEnabled, setSoundEnabled, playDing } from '../lib/sound';
 import supabase from '../supabase';
 import ConfirmModal from '../components/ConfirmModal.vue';
 
@@ -187,6 +200,14 @@ const toggleDarkMode = () => {
 
 const toggleNotifications = async () => {
   await authStore.setNotificationsEnabled(!authStore.notificationsEnabled);
+};
+
+// 🔊 Ovoz effektlari (Web Audio — fayl kerak emas)
+const soundOn = ref(isSoundEnabled());
+const toggleSound = () => {
+  setSoundEnabled(!soundOn.value);
+  soundOn.value = isSoundEnabled();
+  if (soundOn.value) playDing(); // yoqilganda tasdiqlovchi ovoz
 };
 
 // Parol almashtirish

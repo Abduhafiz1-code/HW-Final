@@ -120,7 +120,76 @@ export const useCoinStore = defineStore("coin", () => {
     }
   };
 
-  // ── Progress qo'shish ──────────────────────────────────────
+  // ── Haqiqiy tanga berish (test/o'yin yakunida) ──────────
+  // score asosida: har to'g'ri javob = +5 tanga. CelebrationOverlay'da
+  // aniq miqdor ko'rsatilishi uchun alohida funksiya.
+  const addCoins = async (amount: number) => {
+    if (amount <= 0) return 0;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const newCoins = coins.value + amount;
+    coins.value = newCoins;
+    const { error } = await supabase
+      .from("coins")
+      .update({ coins: newCoins })
+      .eq("user_id", user.id);
+    if (error) {
+      coins.value -= amount;
+      console.error("addCoins error:", error);
+      return 0;
+    }
+    return amount;
+  };
+
+  // ── Tanga sarflash (do'kon, hint, skip) — rollback bilan ────
+  const spendCoins = async (amount: number): Promise<boolean> => {
+    if (amount <= 0) return true;
+    if (coins.value < amount) return false;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const newCoins = coins.value - amount;
+    coins.value = newCoins;
+    const { error } = await supabase
+      .from("coins")
+      .update({ coins: newCoins })
+      .eq("user_id", user.id);
+    if (error) {
+      coins.value += amount; // rollback
+      console.error("spendCoins error:", error);
+      return false;
+    }
+    return true;
+  };
+
+  // ── Olmos sarflash (ramka do'koni, multiplier) ──────────────
+  const spendDiamonds = async (amount: number): Promise<boolean> => {
+    if (amount <= 0) return true;
+    if (diamonds.value < amount) return false;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const newDiamonds = diamonds.value - amount;
+    diamonds.value = newDiamonds;
+    const { error } = await supabase
+      .from("coins")
+      .update({ diamonds: newDiamonds })
+      .eq("user_id", user.id);
+    if (error) {
+      diamonds.value += amount; // rollback
+      console.error("spendDiamonds error:", error);
+      return false;
+    }
+    return true;
+  };
+
+  // ── Progress qo'shish ──────────────────────────────────────────────
   const addProgress = async (amount: number) => {
     const {
       data: { user },
@@ -229,7 +298,10 @@ export const useCoinStore = defineStore("coin", () => {
     cyclePercent,
     canClaimMilestone,
     fetchCoins,
+    addCoins,
     addProgress,
     claimMilestone,
+    spendCoins,
+    spendDiamonds,
   };
 });

@@ -56,6 +56,34 @@
         </div>
       </section>
 
+      <!-- So'nggi yangilanishlar -->
+      <section
+        class="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-5 mb-4 shadow-sm dark:shadow-none">
+        <h3
+          class="font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <Sparkles :size="18" class="text-orange-500" /> So'nggi yangilanishlar
+        </h3>
+        <div class="space-y-3">
+          <div
+            v-for="update in updates"
+            :key="update.title"
+            class="flex items-start gap-3">
+            <div
+              class="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
+              <component :is="update.icon" :size="15" />
+            </div>
+            <div>
+              <p class="font-bold text-sm text-slate-800 dark:text-white/90">
+                {{ update.title }}
+              </p>
+              <p class="text-xs text-slate-500 dark:text-white/50">
+                {{ update.desc }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Qanday foydalanish -->
       <section
         class="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-5 mb-4 shadow-sm dark:shadow-none">
@@ -180,6 +208,9 @@ import {
   Trophy,
   TrendingUp,
   Send,
+  RotateCcw,
+  Zap,
+  ShieldCheck,
 } from "@lucide/vue";
 import { useCoinStore } from "../stores/CoinStore";
 import supabase from "../supabase";
@@ -229,6 +260,34 @@ const features = [
     icon: markRaw(TrendingUp),
     bg: "bg-orange-100 dark:bg-orange-500/20",
     color: "text-orange-500",
+  },
+];
+
+const updates = [
+  {
+    title: "Hisob va mukofotlar yangilandi",
+    desc: "Tangalar, olmoslar, streak va ramkalar yanada tartibli boshqariladi.",
+    icon: markRaw(Zap),
+  },
+  {
+    title: "Global Blitz reytingi",
+    desc: "Blitz o'yinidagi eng yaxshi natijalar umumiy reytingda ko'rinadi.",
+    icon: markRaw(Trophy),
+  },
+  {
+    title: "Eventlar qayta o'ynashga tayyor",
+    desc: "Eventlar natijalari va mukofotlari yangi mavsum uchun yangilanadi.",
+    icon: markRaw(RotateCcw),
+  },
+  {
+    title: "Xavfsizlik yaxshilandi",
+    desc: "Profil, guruh va reyting ma'lumotlariga kirish qoidalari mustahkamlandi.",
+    icon: markRaw(ShieldCheck),
+  },
+  {
+    title: "FAB tugmalari to'g'rilandi",
+    desc: "Tarjimon, guruhlar, chat va o'qituvchi paneli tugmalari to'liq ishlaydi.",
+    icon: markRaw(Users),
   },
 ];
 

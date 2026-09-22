@@ -21,6 +21,33 @@
         <!-- Oq qism -->
         <div class="bg-white">
           <div class="grid gap-4 px-4 py-6 sm:grid-cols-2 sm:px-6">
+            <!-- Vazifa skaner — eng jalb qiluvchi feature, birinchi o'rinda -->
+            <RouterLink to="/homework" class="sm:col-span-2">
+              <article
+                class="group relative overflow-hidden rounded-[1.75rem] border border-orange-200 dark:border-orange-900/50 bg-gradient-to-r from-orange-50 via-white to-amber-50 dark:from-orange-950/40 dark:via-slate-800/60 dark:to-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg card-hover">
+                <div class="absolute -right-6 -top-8 h-24 w-24 rounded-full bg-orange-200/50 dark:bg-orange-900/30"></div>
+                <div class="relative flex items-center gap-4">
+                  <div class="grid h-14 w-14 place-items-center rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 shadow-md shadow-orange-200 dark:shadow-none">
+                    <ScanLine :size="28" class="text-white" />
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Uy vazifasi skaner</h3>
+                      <span class="text-[10px] font-black bg-orange-500 text-white px-2 py-0.5 rounded-lg animate-pulse">YANGI</span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                      Masalani suratga ol — AI bosqichma-bosqich yechib beradi 📸
+                    </p>
+                  </div>
+                </div>
+
+                <div class="relative mt-4 text-sm font-semibold text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                  Hoziroq sinab ko'rish <ArrowRight :size="14" />
+                </div>
+              </article>
+            </RouterLink>
+
             <RouterLink to="/history">
               <article
                 class="group rounded-[1.75rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-md card-hover">
@@ -120,5 +147,5 @@
 </template>
 
 <script setup lang="ts">
-import { Clock, Gamepad2, PenTool, MessageCircleQuestion, ArrowRight } from '@lucide/vue';
+import { Clock, Gamepad2, PenTool, MessageCircleQuestion, ArrowRight, ScanLine } from '@lucide/vue';
 </script>

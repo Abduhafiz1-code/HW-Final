@@ -1,5 +1,6 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-slate-200 shadow-lg z-50">
+  <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-slate-200 shadow-lg z-50"
+    :style="{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }">
     <div class="flex items-center justify-around h-16">
       <RouterLink v-for="item in mobileItems" :key="item.to" :to="item.to" v-slot="{ isActive }">
         <div class="flex flex-col items-center justify-center px-2 py-1 transition-all"

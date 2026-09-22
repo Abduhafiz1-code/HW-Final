@@ -27,12 +27,18 @@ const isPremium = async (): Promise<boolean> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return false;
+  // Har so'rovda DB ga murojaat qilmaslik uchun 5 daqiqalik kesh —
+  // bu AI sahifalarini tezroq ochadi va supabase so'rovlar sonini kamaytiradi.
+  const cache = (window as any).__premiumCache as { value: boolean; at: number } | undefined;
+  if (cache && Date.now() - cache.at < 5 * 60 * 1000) return cache.value;
   const { data } = await supabase
     .from("profiles")
     .select("is_premium")
     .eq("id", user.id)
     .single();
-  return data?.is_premium || false;
+  const value = data?.is_premium || false;
+  (window as any).__premiumCache = { value, at: Date.now() };
+  return value;
 };
 
 export const checkAILimit = async (): Promise<{

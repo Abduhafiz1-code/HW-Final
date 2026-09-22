@@ -53,6 +53,12 @@ const router = createRouter({
       meta: { hideSidebar: true, hideMobileNav: true },
     },
     {
+      path: "/homework",
+      name: "homework",
+      component: () => import("../views/Homework.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
       path: "/translate",
       name: "translate",
       component: () => import("../views/Translate.vue"),
@@ -115,6 +121,24 @@ const router = createRouter({
       path: "/events/subjects",
       name: "event-subjects",
       component: () => import("../views/EventSubjects.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
+      path: "/events/math-sprint",
+      name: "event-math-sprint",
+      component: () => import("../views/EventMathSprint.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
+      path: "/events/idioms",
+      name: "event-idioms",
+      component: () => import("../views/EventIdioms.vue"),
+      meta: { hideSidebar: true, hideMobileNav: true },
+    },
+    {
+      path: "/events/marathon",
+      name: "event-marathon",
+      component: () => import("../views/EventMarathon.vue"),
       meta: { hideSidebar: true, hideMobileNav: true },
     },
     {

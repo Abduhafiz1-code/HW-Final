@@ -89,7 +89,7 @@
                 class="px-2 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-slate-200 transition whitespace-nowrap">
                 <BarChart3 :size="12" class="inline -mt-0.5" /> Natija
               </button>
-              <button @click="deleteTest(test.id)"
+              <button @click="deleteTest(test)"
                 class="px-2 sm:px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-[11px] sm:text-xs font-bold rounded-xl hover:bg-red-100 transition">
                 <Trash2 :size="12" />
               </button>
@@ -259,6 +259,8 @@
                 <p class="text-sm font-semibold text-slate-900 dark:text-white flex-1 min-w-0">
                   {{ i + 1 }}. {{ q.question }}
                 </p>
+                <span v-if="q.type === 'open'"
+                  class="flex-shrink-0 text-[9px] font-black bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded">OCHIQ</span>
                 <button @click="newTest.questions.splice(i, 1)"
                   class="text-red-400 text-xs hover:text-red-600 flex-shrink-0"><X :size="14" /></button>
               </div>
@@ -269,18 +271,39 @@
           <!-- Manual -->
           <div class="border border-slate-200 dark:border-slate-600 rounded-2xl p-4">
             <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3"><Pencil :size="14" class="inline -mt-0.5" /> Qo'lda savol qo'shish</p>
+
+            <!-- Savol turi -->
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button @click="manualQType = 'mcq'" :class="manualQType === 'mcq' ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'border-slate-200 dark:border-slate-600 text-slate-500'"
+                class="py-2 rounded-xl border-2 text-xs font-bold transition">Variantli savol</button>
+              <button @click="manualQType = 'open'" :class="manualQType === 'open' ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'border-slate-200 dark:border-slate-600 text-slate-500'"
+                class="py-2 rounded-xl border-2 text-xs font-bold transition">Ochiq savol (yozma javob)</button>
+            </div>
+
             <input v-model="manualQ.question" placeholder="Savol matni"
               class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none mb-2" />
-            <div class="grid grid-cols-2 gap-2 mb-2">
-              <input v-for="(_, i) in 4" :key="i" v-model="manualQ.options[i]"
-                :placeholder="`Variant ${['A', 'B', 'C', 'D'][i]}`"
-                class="px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-xs focus:outline-none min-w-0" />
-            </div>
-            <select v-model="manualQ.answer"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none">
-              <option value="">To'g'ri javobni tanlang</option>
-              <option v-for="opt in manualQ.options.filter(o => o)" :key="opt" :value="opt">{{ opt }}</option>
-            </select>
+
+            <!-- Variantli: 4 variant + to'g'ri javob tanlash -->
+            <template v-if="manualQType === 'mcq'">
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input v-for="(_, i) in 4" :key="i" v-model="manualQ.options[i]"
+                  :placeholder="`Variant ${['A', 'B', 'C', 'D'][i]}`"
+                  class="px-3 text-slate-800 dark:text-white py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-xs focus:outline-none min-w-0" />
+              </div>
+              <select v-model="manualQ.answer"
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none">
+                <option value="">To'g'ri javobni tanlang</option>
+                <option v-for="opt in manualQ.options.filter(o => o)" :key="opt" :value="opt">{{ opt }}</option>
+              </select>
+            </template>
+
+            <!-- Ochiq: kutilgan javob(lar) -->
+            <template v-else>
+              <input v-model="manualQ.answer" placeholder="Kutilgan javob (bir nechta bo'lsa | bilan ajrating, mas: javob1|javob2)"
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none" />
+              <p class="text-[11px] text-slate-400 mb-2">O'quvchi javobni o'zi yozadi. Sistema kichik-katta harf va ortiqcha probellarni hisobga olmaydi.</p>
+            </template>
+
             <button @click="addManualQ" :disabled="!manualQ.question || !manualQ.answer"
               class="w-full py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm hover:bg-indigo-700 transition disabled:opacity-50">
               + Qo'shish
@@ -401,6 +424,7 @@ import { ref, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/AuthStore";
 import supabase from "../supabase";
 import { askAIJson } from "../lib/ai";
+import { normalizeQuestionList } from "../lib/question";
 import { GraduationCap, ClipboardList, BarChart3, Users, Ban, Send, Trash2, Link, Loader, CheckCircle, AlertTriangle, Bot, Save, X, Pencil } from '@lucide/vue';
 import TeacherBlockedStudents from '../components/TeacherBlockedStudents.vue';
 import OnboardingTooltip from '../components/OnboardingTooltip.vue';
@@ -420,12 +444,13 @@ const newGroupName = ref(""); const aiTestTopic = ref("");
 const aiTestLoading = ref(false); const aiCount = ref("5");
 const copyToast = ref(false);
 
-interface Question { question: string; options: string[]; answer: string; }
+interface Question { type?: "mcq" | "open"; question: string; options: string[]; answer: string; teacher_answer?: string; }
 const tests = ref<any[]>([]);
 const groups = ref<any[]>([]);
 const totalStudents = computed(() => groups.value.reduce((s: number, g: any) => s + (g.students?.length || 0), 0));
 const newTest = ref<{ title: string; subject: string; questions: Question[] }>({ title: "", subject: "Matematika", questions: [] });
 const manualQ = ref({ question: "", options: ["", "", "", ""], answer: "" });
+const manualQType = ref<"mcq" | "open">("mcq");
 
 onMounted(() => fetchTests());
 
@@ -442,22 +467,35 @@ const fetchTests = async () => {
 
 const generateQuestions = async () => {
   aiTestLoading.value = true;
-  const parsed = await askAIJson<Question[]>(
-    `${aiTestTopic.value} mavzusida ${aiCount.value} ta test savol yarat.Mavzuga qarab til tanla. Faqat JSON array: [{"question":"...","options":["A variant","B variant","C variant","D variant"],"answer":"to'g'ri variant (to'liq matn)"}]. Boshqa hech narsa yozma.`,
+  const parsed = await askAIJson<any[]>(
+    `${aiTestTopic.value} mavzusida ${aiCount.value} ta savol yarat. Savollarning ~60% i variantli, ~40% i ochiq (variant yo'q, o'quvchi o'zi qisqa javob yozadi). Mavzuga qarab til tanla. Faqat JSON array: [{"type":"mcq","question":"...","options":["A variant","B variant","C variant","D variant"],"answer":"to'g'ri variant (to'liq matn, harfsiz)"},{"type":"open","question":"...","teacher_answer":"kutilgan qisqa javob (variantlar bo'lsa | bilan ajrat)"}]. Boshqa hech narsa yozma.`,
     []
   );
-  if (parsed.length) newTest.value.questions.push(...parsed);
+  const normalized = normalizeQuestionList(parsed);
+  if (normalized.length) newTest.value.questions.push(...normalized);
   else saveError.value = "AI xatosi. Qayta urinib ko'ring.";
   aiTestLoading.value = false;
 };
 
 const addManualQ = () => {
-  newTest.value.questions.push({
-    question: manualQ.value.question,
-    options: manualQ.value.options.filter((o) => o),
-    answer: manualQ.value.answer,
-  });
+  if (manualQType.value === "open") {
+    newTest.value.questions.push({
+      type: "open",
+      question: manualQ.value.question,
+      options: [],
+      answer: manualQ.value.answer,
+      teacher_answer: manualQ.value.answer,
+    });
+  } else {
+    newTest.value.questions.push({
+      type: "mcq",
+      question: manualQ.value.question,
+      options: manualQ.value.options.filter((o) => o),
+      answer: manualQ.value.answer,
+    });
+  }
   manualQ.value = { question: "", options: ["", "", "", ""], answer: "" };
+  manualQType.value = "mcq";
 };
 
 const saveTest = async () => {
@@ -481,9 +519,10 @@ const saveTest = async () => {
   saving.value = false;
 };
 
-const deleteTest = async (id: string) => {
-  await supabase.from("tests").delete().eq("id", id);
-  tests.value = tests.value.filter((t) => t.id !== id);
+const deleteTest = async (test: any) => {
+  if (!confirm(`"${test.title}" testini o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi.`)) return;
+  await supabase.from("tests").delete().eq("id", test.id);
+  tests.value = tests.value.filter((t) => t.id !== test.id);
 };
 
 const viewResults = async (test: any) => {

@@ -1,9 +1,14 @@
 <template>
-  <div ref="dropdownRef" class="relative inline-block font-sans">
+  <div ref="dropdownRef" class="relative inline-block font-sans flex-1 max-w-[180px]">
     <button @click.stop="isOpen = !isOpen"
-      class="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm hover:bg-gray-50 transition-all border border-gray-200 hover:border-orange-200 active:scale-95">
-      <Flame :size="20" class="text-orange-500" />
-      <span class="text-orange-500 font-black text-base">{{ streakCount }}</span>
+      class="flex items-center gap-2.5 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-200 dark:border-slate-700 hover:border-orange-300 active:scale-95 w-full">
+      <span class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+        <Flame :size="18" class="text-orange-500" />
+      </span>
+      <span class="text-left leading-none">
+        <span class="block text-orange-500 font-black text-base">{{ streakCount }} kun</span>
+        <span class="block text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">streak</span>
+      </span>
     </button>
     <transition name="pop">
       <div v-if="isOpen"

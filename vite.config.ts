@@ -4,13 +4,20 @@ import vue from "@vitejs/plugin-vue";
 import viteImagemin from "vite-plugin-imagemin";
 import { VitePWA } from "vite-plugin-pwa";
 
+// vite-plugin-imagemin Windows'da native binary (gifsicle/jpegtran) muammosi
+// tufayli build'ni sekinlashtiradi/buzadi — shuning uchun u faqat
+// ENABLE_IMAGEMIN=1 bo'lganda yoqiladi (oddiy build'da rasm optimallashtirish o'tkazib yuboriladi).
+const plugins = [
+  tailwindcss(),
+  vue(),
+];
+if (process.env.ENABLE_IMAGEMIN === "1") {
+  plugins.push(viteImagemin({ webp: { quality: 80 } }));
+}
+
 export default defineConfig({
   plugins: [
-    tailwindcss(),
-    vue(),
-    viteImagemin({
-      webp: { quality: 80 },
-    }),
+    ...plugins,
     VitePWA({
       registerType: "autoUpdate",
       // "npm run dev" rejimida ham virtual:pwa-register/vue moduli ishlashi
